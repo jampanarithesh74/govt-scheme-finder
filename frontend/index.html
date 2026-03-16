@@ -130,6 +130,29 @@
         }
         h1 { color: #1e3c72; text-align: center; margin-bottom: 30px; font-size: 28px; }
         .form-group { margin-bottom: 20px; }
+        .input-with-mic { display: flex; gap: 8px; align-items: center; }
+        .input-with-mic input, .input-with-mic select { flex: 1; }
+        .mic-btn {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+        .mic-btn:hover { background: #2a5298; }
+        .mic-btn.listening {
+            background: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
         label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; }
         input, select {
             width: 100%; padding: 12px; border: 2px solid #e0e0e0;
@@ -209,29 +232,39 @@
         <form id="schemeForm">
             <div class="form-group">
                 <label for="age" id="labelAge">Age</label>
-                <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
+                <div class="input-with-mic">
+                    <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
+                    <button type="button" class="mic-btn" onclick="startVoiceInput('age')" title="Voice input">🎤</button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="occupation" id="labelOccupation">Occupation</label>
-                <select id="occupation" name="occupation" required>
-                    <option value="">Select your occupation</option>
-                    <option value="student">Student</option>
-                    <option value="farmer">Farmer</option>
-                    <option value="business">Business Owner</option>
-                    <option value="employee">Salaried Employee</option>
-                    <option value="unemployed">Unemployed</option>
-                    <option value="homemaker">Homemaker</option>
-                    <option value="senior_citizen">Senior Citizen</option>
-                    <option value="other">Other</option>
-                </select>
+                <div class="input-with-mic">
+                    <select id="occupation" name="occupation" required>
+                        <option value="">Select your occupation</option>
+                        <option value="student">Student</option>
+                        <option value="farmer">Farmer</option>
+                        <option value="business">Business Owner</option>
+                        <option value="employee">Salaried Employee</option>
+                        <option value="unemployed">Unemployed</option>
+                        <option value="homemaker">Homemaker</option>
+                        <option value="senior_citizen">Senior Citizen</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <button type="button" class="mic-btn" onclick="startVoiceInput('occupation')" title="Voice input">🎤</button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="income" id="labelIncome">Annual Income (₹)</label>
-                <input type="number" id="income" name="income" min="0" placeholder="Enter annual income" required>
+                <div class="input-with-mic">
+                    <input type="number" id="income" name="income" min="0" placeholder="Enter annual income" required>
+                    <button type="button" class="mic-btn" onclick="startVoiceInput('income')" title="Voice input">🎤</button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="state" id="labelState">State</label>
-                <select id="state" name="state" required>
+                <div class="input-with-mic">
+                    <select id="state" name="state" required>
                     <option value="">Select your state</option>
                     <option value="Andhra Pradesh">Andhra Pradesh</option>
                     <option value="Arunachal Pradesh">Arunachal Pradesh</option>
@@ -264,6 +297,8 @@
                     <option value="Delhi">Delhi (NCT)</option>
                     <option value="Puducherry">Puducherry</option>
                 </select>
+                    <button type="button" class="mic-btn" onclick="startVoiceInput('state')" title="Voice input">🎤</button>
+                </div>
             </div>
             <button type="submit" id="submitBtn">Find Eligible Schemes</button>
             <button type="button" id="resetBtn" class="reset-btn" onclick="resetForm()">Reset Form</button>
@@ -300,6 +335,188 @@
         let isVoiceMode = false;
         let speechSynthesis = window.speechSynthesis;
         let speechEnabled = true;
+        let recognition = null;
+        
+        // Check if speech recognition is supported
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-IN';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+        }
+        
+        // Voice input function
+        function startVoiceInput(fieldId) {
+            if (!recognition) {
+                alert("Voice input is not supported in this browser.");
+                return;
+            }
+            
+            const field = document.getElementById(fieldId);
+            const micBtn = field.parentElement.querySelector('.mic-btn');
+            
+            // Update the mic button to show listening state
+            micBtn.classList.add('listening');
+            micBtn.textContent = '👂';
+            
+            // Set up field-specific recognition
+            if (fieldId === 'age') {
+                recognitiongrammars = new SpeechGrammarList();
+            }
+            
+            recognition.onstart = function() {
+                speak("Listening... Please speak now.");
+            };
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                console.log("Voice input:", transcript);
+                
+                // Process based on field type
+                if (fieldId === 'age') {
+                    // Extract number from speech
+                    const ageNum = extractNumber(transcript);
+                    if (ageNum !== null) {
+                        field.value = ageNum;
+                        speak("Age set to " + ageNum);
+                    } else {
+                        speak("Could not understand the age. Please try again.");
+                    }
+                } else if (fieldId === 'income') {
+                    // Extract number from speech
+                    const incomeNum = extractNumber(transcript);
+                    if (incomeNum !== null) {
+                        field.value = incomeNum;
+                        speak("Income set to rupees " + incomeNum);
+                    } else {
+                        speak("Could not understand the income. Please try again.");
+                    }
+                } else if (fieldId === 'occupation') {
+                    // Match occupation from speech
+                    const occupation = matchOccupation(transcript);
+                    if (occupation) {
+                        field.value = occupation;
+                        speak("Occupation set to " + field.options[field.selectedIndex].text);
+                    } else {
+                        speak("Could not understand the occupation. Please select from the list.");
+                    }
+                } else if (fieldId === 'state') {
+                    // Match state from speech
+                    const state = matchState(transcript);
+                    if (state) {
+                        field.value = state;
+                        speak("State set to " + state);
+                    } else {
+                        speak("Could not understand the state. Please select from the list.");
+                    }
+                }
+                
+                // Reset mic button
+                micBtn.classList.remove('listening');
+                micBtn.textContent = '🎤';
+            };
+            
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error:", event.error);
+                micBtn.classList.remove('listening');
+                micBtn.textContent = '🎤';
+                if (event.error === 'no-speech') {
+                    speak("No speech detected. Please try again.");
+                } else {
+                    speak("Voice input error. Please try again.");
+                }
+            };
+            
+            recognition.onend = function() {
+                micBtn.classList.remove('listening');
+                micBtn.textContent = '🎤';
+            };
+            
+            recognition.start();
+        }
+        
+        // Extract number from spoken text
+        function extractNumber(text) {
+            // Match numbers in text
+            const numberWords = {
+                'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+                'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+                'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+                'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+                'twenty one': 21, 'twenty two': 22, 'twenty three': 23, 'twenty four': 24, 'twenty five': 25,
+                'twenty six': 26, 'twenty seven': 27, 'twenty eight': 28, 'twenty nine': 29, 'thirty': 30,
+                'thirty one': 31, 'thirty two': 32, 'thirty three': 33, 'thirty four': 34, 'thirty five': 35,
+                'thirty six': 36, 'thirty seven': 37, 'thirty eight': 38, 'thirty nine': 39, 'forty': 40,
+                'fifty': 50, 'sixty': 60, 'seventy': 70, 'eighty': 80, 'ninety': 90, 'hundred': 100,
+                'thousand': 1000, 'lakh': 100000, 'lac': 100000, 'crore': 10000000
+            };
+            
+            // First try direct number extraction
+            const digits = text.match(/\d+/);
+            if (digits) {
+                return parseInt(digits[0]);
+            }
+            
+            // Try word to number conversion
+            text = text.toLowerCase().trim();
+            
+            // Handle common patterns like "twenty two" or "22"
+            for (const [word, num] of Object.entries(numberWords)) {
+                if (text.includes(word)) {
+                    // Simple conversion - just return the number found
+                    if (num >= 10 && text.indexOf(word) === 0) {
+                        return num;
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        // Match occupation from speech
+        function matchOccupation(text) {
+            const occupations = [
+                { value: 'student', keywords: ['student', 'study', 'studying', 'college', 'school'] },
+                { value: 'farmer', keywords: ['farmer', 'agriculture', 'farming', 'cultivation'] },
+                { value: 'business', keywords: ['business', 'entrepreneur', 'shop', 'owner', 'merchant'] },
+                { value: 'employee', keywords: ['employee', 'salaried', 'job', 'worker', 'office'] },
+                { value: 'unemployed', keywords: ['unemployed', 'no job', 'jobless', 'seeking'] },
+                { value: 'homemaker', keywords: ['homemaker', 'housewife', 'home maker', 'housework'] },
+                { value: 'senior_citizen', keywords: ['senior', 'retired', 'elderly', 'pensioner', 'old age'] },
+                { value: 'other', keywords: ['other', 'miscellaneous'] }
+            ];
+            
+            text = text.toLowerCase();
+            for (const occ of occupations) {
+                for (const keyword of occ.keywords) {
+                    if (text.includes(keyword)) {
+                        return occ.value;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        // Match state from speech
+        function matchState(text) {
+            const states = [
+                'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+                'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+                'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
+                'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+                'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+                'Delhi', 'Puducherry'
+            ];
+            
+            text = text.toLowerCase();
+            for (const state of states) {
+                if (text.includes(state.toLowerCase())) {
+                    return state;
+                }
+            }
+            return null;
+        }
         
         // Check localStorage on load
         window.onload = function() {
