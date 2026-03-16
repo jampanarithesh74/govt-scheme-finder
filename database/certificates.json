@@ -1,0 +1,187 @@
+[
+    {
+        "certificate_name": "Income Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Address Proof",
+            "Ration Card",
+            "Passport Size Photo"
+        ],
+        "processing_time": "7 days",
+        "application_mode": "MeeSeva / Gram Panchayat / Online",
+        "can_apply_from_home": true
+    },
+    {
+        "certificate_name": "Caste Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Address Proof",
+            "Caste Claim Application",
+            "Passport Size Photo",
+            "Previous Caste Certificate (if available)"
+        ],
+        "processing_time": "15 days",
+        "application_mode": "MeeSeva / Tahsildar Office",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "Residence Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Address Proof",
+            "Voter ID",
+            "Passport Size Photo"
+        ],
+        "processing_time": "5 days",
+        "application_mode": "MeeSeva / Gram Panchayat / Online",
+        "can_apply_from_home": true
+    },
+    {
+        "certificate_name": "Birth Certificate",
+        "documents_required": [
+            "Aadhaar Card of Parents",
+            "Hospital Discharge Certificate",
+            "Marriage Certificate of Parents",
+            "Passport Size Photo"
+        ],
+        "processing_time": "3 days",
+        "application_mode": "MeeSeva / Municipal Office / Online",
+        "can_apply_from_home": true
+    },
+    {
+        "certificate_name": "Death Certificate",
+        "documents_required": [
+            "Aadhaar Card of Deceased",
+            "Hospital Death Certificate",
+            "Burial/Cremation Certificate",
+            "Application Form"
+        ],
+        "processing_time": "7 days",
+        "application_mode": "MeeSeva / Municipal Office",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "Domicile Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Address Proof",
+            "School Leaving Certificate",
+            "Birth Certificate",
+            "Passport Size Photo"
+        ],
+        "processing_time": "10 days",
+        "application_mode": "MeeSeva / Tahsildar Office",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "Non-Creamy Layer Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Caste Certificate",
+            "Income Certificate",
+            "Photographs",
+            "Application Form"
+        ],
+        "processing_time": "15 days",
+        "application_mode": "MeeSeva / Tahsildar Office",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "EWS Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Income Certificate",
+            "Address Proof",
+            "Passport Size Photo",
+            "Land Records (if applicable)"
+        ],
+        "processing_time": "10 days",
+        "application_mode": "MeeSeva / Tahsildar Office / Online",
+        "can_apply_from_home": true
+    },
+    {
+        "certificate_name": "Agricultural Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Land Records",
+            "Passport Size Photo",
+            "Application Form"
+        ],
+        "processing_time": "7 days",
+        "application_mode": "MeeSeva / Agriculture Officer",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "BPL Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Income Certificate",
+            "Address Proof",
+            "Ration Card",
+            "Passport Size Photo"
+        ],
+        "processing_time": "10 days",
+        "application_mode": "MeeSeva / Gram Panchayat",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "Senior Citizen Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Age Proof",
+            "Address Proof",
+            "Passport Size Photo"
+        ],
+        "processing_time": "5 days",
+        "application_mode": "MeeSeva / Online",
+        "can_apply_from_home": true
+    },
+    {
+        "certificate_name": "Disability Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Medical Certificate",
+            "Photographs",
+            "Application Form"
+        ],
+        "processing_time": "15 days",
+        "application_mode": "Medical Authority / District Hospital",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "Widow Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Death Certificate of Husband",
+            "Marriage Certificate",
+            "Passport Size Photo"
+        ],
+        "processing_time": "7 days",
+        "application_mode": "MeeSeva / Tahsildar Office",
+        "can_apply_from_home": false
+    },
+    {
+        "certificate_name": "Unemployment Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Educational Certificates",
+            "Address Proof",
+            "Photographs"
+        ],
+        "processing_time": "5 days",
+        "application_mode": "Employment Exchange / Online",
+        "can_apply_from_home": true
+    },
+    {
+        "certificate_name": "Land Ownership Certificate",
+        "documents_required": [
+            "Aadhaar Card",
+            "Land Records",
+            "Survey Number",
+            "Passport Size Photo"
+        ],
+        "processing_time": "10 days",
+        "application_mode": "MeeSeva / Tahsildar Office",
+        "can_apply_from_home": false
+    }
+]
