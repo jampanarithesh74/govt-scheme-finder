@@ -153,6 +153,31 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
+        .voice-assistant-btn {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .voice-assistant-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.4);
+        }
+        .voice-assistant-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .voice-assistant-btn.listening {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            animation: pulse 1s infinite;
+        }
         label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; }
         input, select {
             width: 100%; padding: 12px; border: 2px solid #e0e0e0;
@@ -232,39 +257,29 @@
         <form id="schemeForm">
             <div class="form-group">
                 <label for="age" id="labelAge">Age</label>
-                <div class="input-with-mic">
-                    <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
-                    <button type="button" class="mic-btn" onclick="startVoiceInput('age')" title="Voice input">🎤</button>
-                </div>
+                <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
             </div>
             <div class="form-group">
                 <label for="occupation" id="labelOccupation">Occupation</label>
-                <div class="input-with-mic">
-                    <select id="occupation" name="occupation" required>
-                        <option value="">Select your occupation</option>
-                        <option value="student">Student</option>
-                        <option value="farmer">Farmer</option>
-                        <option value="business">Business Owner</option>
-                        <option value="employee">Salaried Employee</option>
-                        <option value="unemployed">Unemployed</option>
-                        <option value="homemaker">Homemaker</option>
-                        <option value="senior_citizen">Senior Citizen</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <button type="button" class="mic-btn" onclick="startVoiceInput('occupation')" title="Voice input">🎤</button>
-                </div>
+                <select id="occupation" name="occupation" required>
+                    <option value="">Select your occupation</option>
+                    <option value="student">Student</option>
+                    <option value="farmer">Farmer</option>
+                    <option value="business">Business Owner</option>
+                    <option value="employee">Salaried Employee</option>
+                    <option value="unemployed">Unemployed</option>
+                    <option value="homemaker">Homemaker</option>
+                    <option value="senior_citizen">Senior Citizen</option>
+                    <option value="other">Other</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="income" id="labelIncome">Annual Income (₹)</label>
-                <div class="input-with-mic">
-                    <input type="number" id="income" name="income" min="0" placeholder="Enter annual income" required>
-                    <button type="button" class="mic-btn" onclick="startVoiceInput('income')" title="Voice input">🎤</button>
-                </div>
+                <input type="number" id="income" name="income" min="0" placeholder="Enter annual income" required>
             </div>
             <div class="form-group">
                 <label for="state" id="labelState">State</label>
-                <div class="input-with-mic">
-                    <select id="state" name="state" required>
+                <select id="state" name="state" required>
                     <option value="">Select your state</option>
                     <option value="Andhra Pradesh">Andhra Pradesh</option>
                     <option value="Arunachal Pradesh">Arunachal Pradesh</option>
@@ -297,9 +312,8 @@
                     <option value="Delhi">Delhi (NCT)</option>
                     <option value="Puducherry">Puducherry</option>
                 </select>
-                    <button type="button" class="mic-btn" onclick="startVoiceInput('state')" title="Voice input">🎤</button>
-                </div>
             </div>
+            <button type="button" id="voiceAssistantBtn" class="voice-assistant-btn" onclick="startVoiceAssistant()">🎤 Start Voice Assistant</button>
             <button type="submit" id="submitBtn">Find Eligible Schemes</button>
             <button type="button" id="resetBtn" class="reset-btn" onclick="resetForm()">Reset Form</button>
         </form>
@@ -346,94 +360,149 @@
             recognition.interimResults = false;
         }
         
-        // Voice input function
-        function startVoiceInput(fieldId) {
+        // Voice Assistant - Sequential form filling
+        let voiceAssistantStep = 0;
+        let voiceData = { age: null, occupation: null, income: null, state: null };
+        
+        function startVoiceAssistant() {
             if (!recognition) {
                 alert("Voice input is not supported in this browser.");
                 return;
             }
             
-            const field = document.getElementById(fieldId);
-            const micBtn = field.parentElement.querySelector('.mic-btn');
+            // Disable the button and show listening state
+            const btn = document.getElementById('voiceAssistantBtn');
+            btn.disabled = true;
+            btn.classList.add('listening');
+            btn.textContent = '👂 Listening...';
             
-            // Update the mic button to show listening state
-            micBtn.classList.add('listening');
-            micBtn.textContent = '👂';
+            // Reset data
+            voiceData = { age: null, occupation: null, income: null, state: null };
+            voiceAssistantStep = 0;
             
-            // Set up field-specific recognition
-            if (fieldId === 'age') {
-                recognitiongrammars = new SpeechGrammarList();
+            // Start the conversation
+            speak("Hello! I will help you find eligible government schemes. Let me ask you a few questions.");
+            
+            setTimeout(() => {
+                askNextQuestion();
+            }, 2500);
+        }
+        
+        function askNextQuestion() {
+            const btn = document.getElementById('voiceAssistantBtn');
+            
+            switch(voiceAssistantStep) {
+                case 0:
+                    speak("What is your age?");
+                    setupRecognition('age');
+                    break;
+                case 1:
+                    speak("What is your occupation? For example, student, farmer, business, employee, unemployed, homemaker, or senior citizen.");
+                    setupRecognition('occupation');
+                    break;
+                case 2:
+                    speak("What is your annual income in rupees?");
+                    setupRecognition('income');
+                    break;
+                case 3:
+                    speak("Which state do you live in?");
+                    setupRecognition('state');
+                    break;
+                case 4:
+                    // All questions completed, submit the form
+                    submitVoiceForm();
+                    break;
             }
-            
-            recognition.onstart = function() {
-                speak("Listening... Please speak now.");
-            };
+        }
+        
+        function setupRecognition(fieldId) {
+            const btn = document.getElementById('voiceAssistantBtn');
             
             recognition.onresult = function(event) {
                 const transcript = event.results[0][0].transcript.toLowerCase();
-                console.log("Voice input:", transcript);
+                console.log("Voice input for", fieldId, ":", transcript);
                 
-                // Process based on field type
+                let success = false;
+                
                 if (fieldId === 'age') {
-                    // Extract number from speech
                     const ageNum = extractNumber(transcript);
-                    if (ageNum !== null) {
-                        field.value = ageNum;
-                        speak("Age set to " + ageNum);
+                    if (ageNum !== null && ageNum >= 1 && ageNum <= 120) {
+                        voiceData.age = ageNum;
+                        document.getElementById('age').value = ageNum;
+                        speak("Your age is " + ageNum + ". Moving to the next question.");
+                        success = true;
                     } else {
-                        speak("Could not understand the age. Please try again.");
+                        speak("I didn't catch that. Please say a number between 1 and 120.");
+                        return; // Don't advance to next step
                     }
                 } else if (fieldId === 'income') {
-                    // Extract number from speech
                     const incomeNum = extractNumber(transcript);
                     if (incomeNum !== null) {
-                        field.value = incomeNum;
-                        speak("Income set to rupees " + incomeNum);
+                        voiceData.income = incomeNum;
+                        document.getElementById('income').value = incomeNum;
+                        speak("Your income is rupees " + incomeNum + ". Moving to the next question.");
+                        success = true;
                     } else {
-                        speak("Could not understand the income. Please try again.");
+                        speak("I didn't catch that. Please say your income in numbers.");
+                        return;
                     }
                 } else if (fieldId === 'occupation') {
-                    // Match occupation from speech
                     const occupation = matchOccupation(transcript);
                     if (occupation) {
-                        field.value = occupation;
-                        speak("Occupation set to " + field.options[field.selectedIndex].text);
+                        voiceData.occupation = occupation;
+                        document.getElementById('occupation').value = occupation;
+                        const occText = document.getElementById('occupation').options[document.getElementById('occupation').selectedIndex].text;
+                        speak("Your occupation is " + occText + ". Moving to the next question.");
+                        success = true;
                     } else {
-                        speak("Could not understand the occupation. Please select from the list.");
+                        speak("I didn't understand. Please say student, farmer, business, employee, unemployed, homemaker, or senior citizen.");
+                        return;
                     }
                 } else if (fieldId === 'state') {
-                    // Match state from speech
                     const state = matchState(transcript);
                     if (state) {
-                        field.value = state;
-                        speak("State set to " + state);
+                        voiceData.state = state;
+                        document.getElementById('state').value = state;
+                        speak("Your state is " + state + ".");
+                        success = true;
                     } else {
-                        speak("Could not understand the state. Please select from the list.");
+                        speak("I didn't understand. Please say your state name.");
+                        return;
                     }
                 }
                 
-                // Reset mic button
-                micBtn.classList.remove('listening');
-                micBtn.textContent = '🎤';
+                if (success) {
+                    voiceAssistantStep++;
+                    setTimeout(() => askNextQuestion(), 2000);
+                }
             };
             
             recognition.onerror = function(event) {
                 console.error("Speech recognition error:", event.error);
-                micBtn.classList.remove('listening');
-                micBtn.textContent = '🎤';
                 if (event.error === 'no-speech') {
                     speak("No speech detected. Please try again.");
+                    setTimeout(() => askNextQuestion(), 1500);
                 } else {
-                    speak("Voice input error. Please try again.");
+                    speak("There was an error. Let me try again.");
+                    setTimeout(() => askNextQuestion(), 1500);
                 }
             };
             
-            recognition.onend = function() {
-                micBtn.classList.remove('listening');
-                micBtn.textContent = '🎤';
-            };
-            
             recognition.start();
+        }
+        
+        function submitVoiceForm() {
+            const btn = document.getElementById('voiceAssistantBtn');
+            btn.disabled = false;
+            btn.classList.remove('listening');
+            btn.textContent = '🎤 Start Voice Assistant';
+            
+            speak("Thank you! I have collected all your information. Now finding eligible schemes for you.");
+            
+            // Programmatically submit the form
+            setTimeout(() => {
+                document.getElementById('schemeForm').dispatchEvent(new Event('submit'));
+            }, 2000);
         }
         
         // Extract number from spoken text
