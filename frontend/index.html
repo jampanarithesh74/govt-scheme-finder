@@ -179,6 +179,94 @@
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             animation: pulse 1s infinite;
         }
+        
+        /* Restart Button */
+        .restart-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.4);
+            background: #138496;
+        }
+        .restart-btn.visible {
+            display: block;
+        }
+        
+        /* Loading Spinner */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ffc107;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: white;
+            font-size: 24px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        /* Voice Status Indicator */
+        .voice-status {
+            display: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .voice-status.listening {
+            display: block;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .voice-status.speaking {
+            display: block;
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .voice-status.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
         label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; }
         input, select {
             width: 100%; padding: 12px; border: 2px solid #e0e0e0;
@@ -252,9 +340,18 @@
         <button id="accessibilityBtn" class="voice-off" onclick="toggleAccessibility()">Enable Voice Help</button>
     </div>
     
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Finding schemes for you...</div>
+    </div>
 
     <div class="container">
         <h1 id="title">Government Scheme Finder</h1>
+        
+        <!-- Voice Status Indicator -->
+        <div class="voice-status" id="voiceStatus"></div>
+        
         <form id="schemeForm">
             <div class="form-group">
                 <label for="age" id="labelAge">Age</label>
@@ -315,6 +412,7 @@
                 </select>
             </div>
             <button type="button" id="voiceAssistantBtn" class="voice-assistant-btn" onclick="startVoiceAssistant()">🎤 Start Voice Assistant</button>
+            <button type="button" id="restartBtn" class="restart-btn" onclick="restartConversation()">🔄 Start Again</button>
             <button type="submit" id="submitBtn">Find Eligible Schemes</button>
             <button type="button" id="resetBtn" class="reset-btn" onclick="resetForm()">Reset Form</button>
         </form>
@@ -352,6 +450,15 @@
         let speechEnabled = true;
         let recognition = null;
         
+        // Voice Assistant state
+        let voiceAssistantStep = 0;
+        let voiceData = { age: null, occupation: null, income: null, state: null };
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+        let isSpeaking = false;
+        let isListening = false;
+        let pendingQuestion = null;
+        
         // Check if speech recognition is supported
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
@@ -359,11 +466,70 @@
             recognition.lang = 'en-IN';
             recognition.continuous = false;
             recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
         }
         
-        // Voice Assistant - Sequential form filling
-        let voiceAssistantStep = 0;
-        let voiceData = { age: null, occupation: null, income: null, state: null };
+        // Update voice status indicator
+        function updateVoiceStatus(status, message) {
+            const statusEl = document.getElementById('voiceStatus');
+            statusEl.className = 'voice-status ' + status;
+            statusEl.textContent = message;
+        }
+        
+        function clearVoiceStatus() {
+            const statusEl = document.getElementById('voiceStatus');
+            statusEl.className = 'voice-status';
+            statusEl.textContent = '';
+        }
+        
+        // Speak text with callback support
+        function speak(text, callback) {
+            if (isVoiceMode && speechEnabled) {
+                speechSynthesis.cancel();
+                isSpeaking = true;
+                updateVoiceStatus('speaking', '🔊 Speaking...');
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-IN';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                
+                utterance.onend = function() {
+                    isSpeaking = false;
+                    clearVoiceStatus();
+                    if (callback) {
+                        callback();
+                    }
+                };
+                
+                utterance.onerror = function(event) {
+                    isSpeaking = false;
+                    clearVoiceStatus();
+                    console.error('Speech synthesis error:', event);
+                    if (callback) {
+                        callback();
+                    }
+                };
+                
+                speechSynthesis.speak(utterance);
+            } else if (callback) {
+                callback();
+            }
+        }
+        
+        // Wait for speech to finish
+        function waitForSpeechToFinish(callback) {
+            if (!isSpeaking) {
+                callback();
+            } else {
+                const checkInterval = setInterval(() => {
+                    if (!isSpeaking) {
+                        clearInterval(checkInterval);
+                        callback();
+                    }
+                }, 100);
+            }
+        }
         
         function startVoiceAssistant() {
             if (!recognition) {
@@ -371,174 +537,373 @@
                 return;
             }
             
+            // Check microphone permission
+            if (recognition.permission === 'denied') {
+                showMicPermissionError();
+                return;
+            }
+            
             // Disable the button and show listening state
             const btn = document.getElementById('voiceAssistantBtn');
+            const restartBtn = document.getElementById('restartBtn');
             btn.disabled = true;
             btn.classList.add('listening');
             btn.textContent = '👂 Listening...';
+            restartBtn.classList.remove('visible');
             
             // Reset data
             voiceData = { age: null, occupation: null, income: null, state: null };
             voiceAssistantStep = 0;
+            retryCount = 0;
             
             // Start the conversation
-            speak("Hello! I will help you find eligible government schemes. Let me ask you a few questions.");
+            speak("Hello! I will help you find eligible government schemes. Let me ask you a few questions.", () => {
+                setTimeout(() => {
+                    askNextQuestion();
+                }, 500);
+            });
+        }
+        
+        function restartConversation() {
+            // Reset form
+            resetForm();
             
-            setTimeout(() => {
-                askNextQuestion();
-            }, 2500);
+            // Reset voice data
+            voiceData = { age: null, occupation: null, income: null, state: null };
+            voiceAssistantStep = 0;
+            retryCount = 0;
+            
+            // Reset button states
+            const btn = document.getElementById('voiceAssistantBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            btn.disabled = false;
+            btn.classList.remove('listening');
+            btn.textContent = '🎤 Start Voice Assistant';
+            restartBtn.classList.remove('visible');
+            
+            // Start voice assistant again
+            startVoiceAssistant();
         }
         
         function askNextQuestion() {
+            if (voiceAssistantStep >= 4) {
+                // All questions completed, submit the form
+                submitVoiceForm();
+                return;
+            }
+            
             const btn = document.getElementById('voiceAssistantBtn');
             
             switch(voiceAssistantStep) {
                 case 0:
-                    speak("What is your age?");
-                    setupRecognition('age');
+                    speak("What is your age?", () => {
+                        setupRecognition('age');
+                    });
                     break;
                 case 1:
-                    speak("What is your occupation? For example, student, farmer, business, employee, unemployed, homemaker, or senior citizen.");
-                    setupRecognition('occupation');
+                    speak("What is your occupation? For example, student, farmer, business, employee, unemployed, homemaker, or senior citizen.", () => {
+                        setupRecognition('occupation');
+                    });
                     break;
                 case 2:
-                    speak("What is your annual income in rupees?");
-                    setupRecognition('income');
+                    speak("What is your annual income in rupees? You can say things like one lakh, or fifty thousand.", () => {
+                        setupRecognition('income');
+                    });
                     break;
                 case 3:
-                    speak("Which state do you live in?");
-                    setupRecognition('state');
-                    break;
-                case 4:
-                    // All questions completed, submit the form
-                    submitVoiceForm();
+                    speak("Which state do you live in?", () => {
+                        setupRecognition('state');
+                    });
                     break;
             }
         }
         
         function setupRecognition(fieldId) {
+            if (!recognition) {
+                showMicPermissionError();
+                return;
+            }
+            
             const btn = document.getElementById('voiceAssistantBtn');
             
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript.toLowerCase();
-                console.log("Voice input for", fieldId, ":", transcript);
+            // Wait for any ongoing speech to finish
+            waitForSpeechToFinish(() => {
+                // Set up the recognition handler
+                recognition.onresult = function(event) {
+                    isListening = false;
+                    btn.classList.remove('listening');
+                    btn.textContent = '🎤 Start Voice Assistant';
+                    
+                    const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                    console.log("Voice input for", fieldId, ":", transcript);
+                    
+                    // Reset retry count on successful input
+                    retryCount = 0;
+                    
+                    let success = false;
+                    let errorMessage = "";
+                    
+                    if (fieldId === 'age') {
+                        const ageNum = extractNumber(transcript);
+                        if (ageNum !== null && ageNum >= 1 && ageNum <= 120) {
+                            voiceData.age = ageNum;
+                            document.getElementById('age').value = ageNum;
+                            speak("Your age is " + ageNum + ". Moving to the next question.", () => {
+                                voiceAssistantStep++;
+                                setTimeout(() => askNextQuestion(), 500);
+                            });
+                            success = true;
+                        } else {
+                            errorMessage = "I didn't catch that. Please say a number between 1 and 120.";
+                        }
+                    } else if (fieldId === 'income') {
+                        const incomeNum = extractNumber(transcript);
+                        if (incomeNum !== null && incomeNum >= 0) {
+                            voiceData.income = incomeNum;
+                            document.getElementById('income').value = incomeNum;
+                            speak("Your income is rupees " + incomeNum.toLocaleString() + ". Moving to the next question.", () => {
+                                voiceAssistantStep++;
+                                setTimeout(() => askNextQuestion(), 500);
+                            });
+                            success = true;
+                        } else {
+                            errorMessage = "I didn't catch that. Please say your income in numbers, like one lakh or fifty thousand.";
+                        }
+                    } else if (fieldId === 'occupation') {
+                        const occupation = matchOccupation(transcript);
+                        if (occupation) {
+                            voiceData.occupation = occupation;
+                            document.getElementById('occupation').value = occupation;
+                            const occText = document.getElementById('occupation').options[document.getElementById('occupation').selectedIndex].text;
+                            speak("Your occupation is " + occText + ". Moving to the next question.", () => {
+                                voiceAssistantStep++;
+                                setTimeout(() => askNextQuestion(), 500);
+                            });
+                            success = true;
+                        } else {
+                            errorMessage = "I didn't understand. Please say student, farmer, business, employee, unemployed, homemaker, or senior citizen.";
+                        }
+                    } else if (fieldId === 'state') {
+                        const state = matchState(transcript);
+                        if (state) {
+                            voiceData.state = state;
+                            document.getElementById('state').value = state;
+                            speak("Your state is " + state + ". Now finding eligible schemes for you.", () => {
+                                voiceAssistantStep++;
+                                setTimeout(() => askNextQuestion(), 500);
+                            });
+                            success = true;
+                        } else {
+                            errorMessage = "I didn't understand. Please say your state name clearly.";
+                        }
+                    }
+                    
+                    if (!success) {
+                        handleRetry(fieldId, errorMessage);
+                    }
+                };
                 
-                let success = false;
+                recognition.onerror = function(event) {
+                    console.error("Speech recognition error:", event.error);
+                    isListening = false;
+                    btn.classList.remove('listening');
+                    btn.textContent = '🎤 Start Voice Assistant';
+                    
+                    let errorMsg = "";
+                    
+                    if (event.error === 'no-speech') {
+                        errorMsg = "I didn't catch that, please repeat.";
+                    } else if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+                        showMicPermissionError();
+                        return;
+                    } else if (event.error === 'network') {
+                        errorMsg = "Network error. Please check your connection.";
+                    } else {
+                        errorMsg = "There was an error. Let me try again.";
+                    }
+                    
+                    handleRetry(fieldId, errorMsg);
+                };
                 
-                if (fieldId === 'age') {
-                    const ageNum = extractNumber(transcript);
-                    if (ageNum !== null && ageNum >= 1 && ageNum <= 120) {
-                        voiceData.age = ageNum;
-                        document.getElementById('age').value = ageNum;
-                        speak("Your age is " + ageNum + ". Moving to the next question.");
-                        success = true;
-                    } else {
-                        speak("I didn't catch that. Please say a number between 1 and 120.");
-                        return; // Don't advance to next step
+                recognition.onend = function() {
+                    // Recognition ended without result
+                    if (isListening) {
+                        isListening = false;
+                        btn.classList.remove('listening');
+                        btn.textContent = '🎤 Start Voice Assistant';
+                        handleRetry(fieldId, "I didn't catch that, please repeat.");
                     }
-                } else if (fieldId === 'income') {
-                    const incomeNum = extractNumber(transcript);
-                    if (incomeNum !== null) {
-                        voiceData.income = incomeNum;
-                        document.getElementById('income').value = incomeNum;
-                        speak("Your income is rupees " + incomeNum + ". Moving to the next question.");
-                        success = true;
-                    } else {
-                        speak("I didn't catch that. Please say your income in numbers.");
-                        return;
-                    }
-                } else if (fieldId === 'occupation') {
-                    const occupation = matchOccupation(transcript);
-                    if (occupation) {
-                        voiceData.occupation = occupation;
-                        document.getElementById('occupation').value = occupation;
-                        const occText = document.getElementById('occupation').options[document.getElementById('occupation').selectedIndex].text;
-                        speak("Your occupation is " + occText + ". Moving to the next question.");
-                        success = true;
-                    } else {
-                        speak("I didn't understand. Please say student, farmer, business, employee, unemployed, homemaker, or senior citizen.");
-                        return;
-                    }
-                } else if (fieldId === 'state') {
-                    const state = matchState(transcript);
-                    if (state) {
-                        voiceData.state = state;
-                        document.getElementById('state').value = state;
-                        speak("Your state is " + state + ".");
-                        success = true;
-                    } else {
-                        speak("I didn't understand. Please say your state name.");
-                        return;
-                    }
-                }
+                };
                 
-                if (success) {
-                    voiceAssistantStep++;
-                    setTimeout(() => askNextQuestion(), 2000);
+                // Start listening
+                isListening = true;
+                btn.disabled = false;
+                btn.classList.add('listening');
+                btn.textContent = '👂 Tell me...';
+                
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.error("Recognition start error:", e);
+                    isListening = false;
+                    btn.classList.remove('listening');
+                    btn.textContent = '🎤 Start Voice Assistant';
                 }
-            };
-            
-            recognition.onerror = function(event) {
-                console.error("Speech recognition error:", event.error);
-                if (event.error === 'no-speech') {
-                    speak("No speech detected. Please try again.");
-                    setTimeout(() => askNextQuestion(), 1500);
-                } else {
-                    speak("There was an error. Let me try again.");
-                    setTimeout(() => askNextQuestion(), 1500);
-                }
-            };
-            
-            recognition.start();
+            });
         }
         
-        function submitVoiceForm() {
+        function handleRetry(fieldId, errorMessage) {
+            retryCount++;
+            
+            if (retryCount >= MAX_RETRIES) {
+                // Too many retries, ask if user wants to continue
+                speak("I've tried several times but couldn't understand. Would you like to try again or skip this question?", () => {
+                    retryCount = 0;
+                    // Set up a simple recognition to continue
+                    setTimeout(() => {
+                        setupRecognition(fieldId);
+                    }, 2000);
+                });
+            } else {
+                // Retry with the same question
+                speak(errorMessage, () => {
+                    setTimeout(() => {
+                        setupRecognition(fieldId);
+                    }, 500);
+                });
+            }
+        }
+        
+        function showMicPermissionError() {
+            updateVoiceStatus('error', '🎤 Microphone access is required for voice assistant');
+            speak("Microphone access is required for voice assistant. Please enable microphone permission in your browser settings, or fill in the form manually.", () => {
+                setTimeout(() => {
+                    clearVoiceStatus();
+                }, 3000);
+            });
+            
+            // Enable manual mode
             const btn = document.getElementById('voiceAssistantBtn');
             btn.disabled = false;
             btn.classList.remove('listening');
             btn.textContent = '🎤 Start Voice Assistant';
-            
-            speak("Thank you! I have collected all your information. Now finding eligible schemes for you.");
-            
-            // Programmatically submit the form
-            setTimeout(() => {
-                document.getElementById('schemeForm').dispatchEvent(new Event('submit'));
-            }, 2000);
         }
         
-        // Extract number from spoken text
-        function extractNumber(text) {
-            // Match numbers in text
-            const numberWords = {
-                'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-                'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-                'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
-                'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
-                'twenty one': 21, 'twenty two': 22, 'twenty three': 23, 'twenty four': 24, 'twenty five': 25,
-                'twenty six': 26, 'twenty seven': 27, 'twenty eight': 28, 'twenty nine': 29, 'thirty': 30,
-                'thirty one': 31, 'thirty two': 32, 'thirty three': 33, 'thirty four': 34, 'thirty five': 35,
-                'thirty six': 36, 'thirty seven': 37, 'thirty eight': 38, 'thirty nine': 39, 'forty': 40,
-                'fifty': 50, 'sixty': 60, 'seventy': 70, 'eighty': 80, 'ninety': 90, 'hundred': 100,
-                'thousand': 1000, 'lakh': 100000, 'lac': 100000, 'crore': 10000000
-            };
+        function submitVoiceForm() {
+            const btn = document.getElementById('voiceAssistantBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            btn.disabled = false;
+            btn.classList.remove('listening');
+            btn.textContent = '🎤 Start Voice Assistant';
+            restartBtn.classList.add('visible');
             
-            // First try direct number extraction
+            // Show loading
+            showLoading();
+            
+            speak("Finding schemes for you...", () => {
+                // Submit the form programmatically
+                setTimeout(() => {
+                    document.getElementById('schemeForm').dispatchEvent(new Event('submit'));
+                }, 500);
+            });
+        }
+        
+        function showLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            loadingText.textContent = "Finding schemes for you...";
+            overlay.classList.add('active');
+        }
+        
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('active');
+        }
+        
+        // Enhanced number extraction with proper handling of spoken numbers
+        function extractNumber(text) {
+            text = text.toLowerCase().trim();
+            
+            // First try direct digit extraction
             const digits = text.match(/\d+/);
             if (digits) {
                 return parseInt(digits[0]);
             }
             
-            // Try word to number conversion
-            text = text.toLowerCase().trim();
+            // Number words mapping
+            const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+                         'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+            const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
             
-            // Handle common patterns like "twenty two" or "22"
-            for (const [word, num] of Object.entries(numberWords)) {
-                if (text.includes(word)) {
-                    // Simple conversion - just return the number found
-                    if (num >= 10 && text.indexOf(word) === 0) {
-                        return num;
+            // Check for lakh, thousand, crore
+            let multiplier = 1;
+            if (text.includes('crore')) {
+                multiplier = 10000000;
+                text = text.replace(/crore/g, '').trim();
+            } else if (text.includes('lakh') || text.includes('lac')) {
+                multiplier = 100000;
+                text = text.replace(/lakh/g, '').replace(/lac/g, '').trim();
+            } else if (text.includes('thousand')) {
+                multiplier = 1000;
+                text = text.replace(/thousand/g, '').trim();
+            } else if (text.includes('hundred')) {
+                multiplier = 100;
+                text = text.replace(/hundred/g, '').trim();
+            }
+            
+            // Handle simple cases like "twenty two" or "22"
+            let result = 0;
+            
+            // Try to parse compound numbers like "twenty two", "thirty five"
+            for (let i = 0; i < ones.length; i++) {
+                if (text === ones[i]) {
+                    result = i;
+                    break;
+                }
+            }
+            
+            if (result === 0) {
+                // Try parsing tens
+                for (let i = 2; i < tens.length; i++) {
+                    if (text.startsWith(tens[i])) {
+                        result = i * 10;
+                        const remaining = text.replace(tens[i], '').trim();
+                        for (let j = 1; j < ones.length; j++) {
+                            if (remaining === ones[j]) {
+                                result += j;
+                                break;
+                            }
+                        }
+                        break;
                     }
                 }
+            }
+            
+            // If still no result, try matching the full text
+            if (result === 0) {
+                const numberWords = {
+                    'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+                    'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+                    'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+                    'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+                    'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70, 
+                    'eighty': 80, 'ninety': 90, 'hundred': 100, 'thousand': 1000
+                };
+                
+                for (const [word, num] of Object.entries(numberWords)) {
+                    if (text.includes(word)) {
+                        // Check if it's at the beginning or standalone
+                        const index = text.indexOf(word);
+                        if (index === 0 || (index > 0 && text[index - 1] === ' ')) {
+                            result = num;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (result > 0) {
+                return result * multiplier;
             }
             
             return null;
@@ -547,14 +912,14 @@
         // Match occupation from speech
         function matchOccupation(text) {
             const occupations = [
-                { value: 'student', keywords: ['student', 'study', 'studying', 'college', 'school'] },
-                { value: 'farmer', keywords: ['farmer', 'agriculture', 'farming', 'cultivation'] },
-                { value: 'business', keywords: ['business', 'entrepreneur', 'shop', 'owner', 'merchant'] },
-                { value: 'employee', keywords: ['employee', 'salaried', 'job', 'worker', 'office'] },
-                { value: 'unemployed', keywords: ['unemployed', 'no job', 'jobless', 'seeking'] },
-                { value: 'homemaker', keywords: ['homemaker', 'housewife', 'home maker', 'housework'] },
-                { value: 'senior_citizen', keywords: ['senior', 'retired', 'elderly', 'pensioner', 'old age'] },
-                { value: 'other', keywords: ['other', 'miscellaneous'] }
+                { value: 'student', keywords: ['student', 'study', 'studying', 'college', 'school', 'studies'] },
+                { value: 'farmer', keywords: ['farmer', 'agriculture', 'farming', 'cultivation', 'agricultural'] },
+                { value: 'business', keywords: ['business', 'entrepreneur', 'shop', 'owner', 'merchant', 'businessman'] },
+                { value: 'employee', keywords: ['employee', 'salaried', 'job', 'worker', 'office', 'employed', 'service'] },
+                { value: 'unemployed', keywords: ['unemployed', 'no job', 'jobless', 'seeking', 'unemployment'] },
+                { value: 'homemaker', keywords: ['homemaker', 'housewife', 'home maker', 'housework', 'house', 'home'] },
+                { value: 'senior_citizen', keywords: ['senior', 'retired', 'elderly', 'pensioner', 'old age', 'senior citizen', 'retirement'] },
+                { value: 'other', keywords: ['other', 'miscellaneous', 'others'] }
             ];
             
             text = text.toLowerCase();
@@ -664,18 +1029,6 @@
             }
         }
         
-        // Speak text using speech synthesis
-        function speak(text) {
-            if (isVoiceMode && speechEnabled) {
-                speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-IN';
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                speechSynthesis.speak(utterance);
-            }
-        }
-        
         // Add voice guidance to form fields
         function setupVoiceGuidance() {
             if (!isVoiceMode) return;
@@ -752,6 +1105,8 @@
         function resetForm() {
             document.getElementById('schemeForm').reset();
             document.getElementById('result').style.display = 'none';
+            // Hide restart button
+            document.getElementById('restartBtn').classList.remove('visible');
         }
         
         function openCertificateModal(certName) {
@@ -792,6 +1147,9 @@
             
             if (age < 1 || age > 120) {
                 alert('Please enter a valid age');
+                if (isVoiceMode) {
+                    speak("Please enter a valid age between 1 and 120.");
+                }
                 return;
             }
             
@@ -802,6 +1160,9 @@
                 const stateMatch = scheme.state === 'all' || scheme.state === state;
                 return ageMatch && incomeMatch && occMatch && stateMatch;
             });
+            
+            // Hide loading
+            hideLoading();
             
             if (matchingSchemes.length > 0) {
                 resultDiv.className = 'success';
@@ -824,12 +1185,17 @@
                 html += '</div>';
                 resultDiv.innerHTML = html;
                 
-                // Voice mode announcement
+                // Enhanced voice mode announcement
                 if (isVoiceMode) {
-                    let resultText = "Found " + matchingSchemes.length + " eligible schemes. ";
-                    matchingSchemes.forEach((scheme, index) => {
-                        resultText += (index + 1) + ". " + scheme.name + ". Benefit: " + scheme.benefit + ". ";
-                    });
+                    const count = matchingSchemes.length;
+                    let resultText = "You are eligible for " + count + " scheme";
+                    if (count > 1) resultText += "s";
+                    
+                    // Add top scheme name
+                    if (count > 0) {
+                        resultText += ". Top scheme: " + matchingSchemes[0].name + ". Benefit: " + matchingSchemes[0].benefit;
+                    }
+                    
                     speak(resultText);
                 }
             } else {
