@@ -13,8 +13,79 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        
+        /* Progress Indicator */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: none;
+        }
+        .progress-container.visible {
+            display: block;
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: center;
             align-items: center;
             padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .step-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .progress-step.active .step-circle {
+            background: #ffc107;
+            color: #333;
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.3);
+        }
+        .progress-step.completed .step-circle {
+            background: #28a745;
+            color: white;
+        }
+        .step-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+        }
+        .progress-step.active .step-label {
+            color: #333;
+            font-weight: 600;
+        }
+        .progress-step.completed .step-label {
+            color: #28a745;
+        }
+        .step-connector {
+            width: 60px;
+            height: 3px;
+            background: #e0e0e0;
+            margin: 0 15px;
+        }
+        .step-connector.completed {
+            background: #28a745;
         }
         
         /* Welcome Screen Styles */
@@ -61,6 +132,7 @@
             display: flex;
             gap: 20px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .mode-btn {
@@ -120,40 +192,37 @@
             color: white;
         }
         
-        .language-selector { position: absolute; top: 20px; right: 20px; }
-        .language-selector select {
-            padding: 10px 15px; border: 2px solid white; border-radius: 6px;
-            background: rgba(255,255,255,0.9); color: #1e3c72; font-size: 14px; font-weight: 600; cursor: pointer;
-        }
         .container {
             background: white; padding: 40px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 550px;
+            margin-top: 100px;
         }
+        
+        /* Step Containers */
+        .step-container {
+            display: none;
+        }
+        .step-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         h1 { color: #1e3c72; text-align: center; margin-bottom: 30px; font-size: 28px; }
+        
         .form-group { margin-bottom: 20px; }
-        .input-with-mic { display: flex; gap: 8px; align-items: center; }
-        .input-with-mic input, .input-with-mic select { flex: 1; }
-        .mic-btn {
-            background: #1e3c72;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            transition: background 0.3s;
+        
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; }
+        input, select {
+            width: 100%; padding: 12px; border: 2px solid #e0e0e0;
+            border-radius: 8px; font-size: 16px;
         }
-        .mic-btn:hover { background: #2a5298; }
-        .mic-btn.listening {
-            background: #e74c3c;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+        input:focus, select:focus { outline: none; border-color: #2a5298; }
+        
+        /* Voice Assistant Button */
         .voice-assistant-btn {
             background: linear-gradient(135deg, #1e3c72, #2a5298);
             color: white;
@@ -203,40 +272,10 @@
             display: block;
         }
         
-        /* Loading Spinner */
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        .loading-overlay.active {
-            display: flex;
-        }
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #ffc107;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loading-text {
-            color: white;
-            font-size: 24px;
-            margin-top: 20px;
-            text-align: center;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
         /* Voice Status Indicator */
@@ -267,59 +306,179 @@
             border: 1px solid #f5c6cb;
         }
         
-        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; }
-        input, select {
-            width: 100%; padding: 12px; border: 2px solid #e0e0e0;
-            border-radius: 8px; font-size: 16px;
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
         }
-        input:focus, select:focus { outline: none; border-color: #2a5298; }
-        button {
-            width: 100%; padding: 15px; background: #1e3c72; color: white;
-            border: none; border-radius: 8px; font-size: 18px; font-weight: 600;
-            cursor: pointer; margin-top: 10px;
-        }
-        button:hover { background: #2a5298; }
-        .reset-btn { background: #6c757d; margin-top: 10px; }
-        .reset-btn:hover { background: #5a6268; }
-        #result { margin-top: 25px; padding: 20px; border-radius: 8px; display: none; }
-        #result.success { display: block; background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-        #result.error { display: block; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-        .scheme-list { margin-top: 15px; }
-        .scheme-card {
-            background: white; border-radius: 12px; padding: 20px;
-            margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border-left: 5px solid #1e3c72;
-        }
-        .scheme-name { font-size: 20px; font-weight: 700; color: #1e3c72; margin-bottom: 8px; }
-        .scheme-desc { color: #666; margin-bottom: 15px; font-size: 14px; line-height: 1.4; }
-        .scheme-detail { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px; }
-        .scheme-detail .label { font-weight: 600; color: #1e3c72; display: block; font-size: 13px; margin-bottom: 4px; }
-        .scheme-detail .value { color: #333; font-size: 14px; }
-        .apply-btn {
-            display: inline-block; margin-top: 15px; padding: 12px 30px;
-            background: #28a745; color: white; text-decoration: none; border-radius: 6px;
+        
+        .next-btn {
+            flex: 1;
+            padding: 15px;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
             font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
         }
+        .next-btn:hover { background: #2a5298; }
+        .next-btn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .back-btn {
+            padding: 15px 25px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: none;
+        }
+        .back-btn.visible { display: block; }
+        .back-btn:hover { background: #5a6268; }
+        
+        /* Step 2: Processing */
+        .processing-content {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .processing-spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #ffc107;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .processing-text {
+            font-size: 22px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .processing-subtext {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        /* Step 3: Results */
+        .results-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .results-count {
+            font-size: 20px;
+            color: #28a745;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .results-count.no-match {
+            color: #dc3545;
+        }
+        
+        .scheme-list { margin-top: 15px; }
+        
+        .scheme-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #1e3c72;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .scheme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .scheme-name { font-size: 18px; font-weight: 700; color: #1e3c72; margin-bottom: 8px; }
+        .scheme-desc { color: #666; margin-bottom: 12px; font-size: 14px; line-height: 1.4; }
+        
+        .scheme-detail {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .scheme-detail .label { font-weight: 600; color: #1e3c72; font-size: 13px; }
+        .scheme-detail .value { color: #333; font-size: 14px; font-weight: 500; }
+        
+        .scheme-documents {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+        
+        .scheme-documents .label {
+            font-weight: 600;
+            color: #1e3c72;
+            font-size: 13px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        
+        .apply-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
         .apply-btn:hover { background: #218838; }
-        .required-certificates { margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0; }
-        .required-certificates-label { font-weight: 600; color: #1e3c72; margin-bottom: 10px; display: block; }
-        .certificate-link {
-            display: inline-block; color: #2a5298; cursor: pointer;
-            text-decoration: underline; margin: 3px 5px; padding: 4px 8px;
-            background: #f0f7ff; border-radius: 4px; font-size: 13px;
+        
+        /* Reset Button */
+        .reset-btn { 
+            background: #6c757d; 
+            margin-top: 20px;
         }
-        .certificate-link:hover { background: #d0e0ff; color: #1e3c72; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #666; background: none; border: none; }
-        .modal-close:hover { color: #333; }
-        .modal h2 { color: #1e3c72; margin-bottom: 20px; font-size: 22px; }
-        .modal-detail { margin-bottom: 15px; }
-        .modal-detail-label { font-weight: 600; color: #1e3c72; margin-bottom: 5px; }
-        .modal-detail-value { color: #333; line-height: 1.5; }
-        .modal-yes { color: #28a745; font-weight: 600; }
-        .modal-no { color: #dc3545; font-weight: 600; }
+        .reset-btn:hover { background: #5a6268; }
+        
+        /* Error message */
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-message.visible {
+            display: block;
+        }
+        
+        /* Language selector */
+        .language-selector { position: absolute; top: 20px; right: 20px; }
+        .language-selector select {
+            padding: 10px 15px; border: 2px solid white; border-radius: 6px;
+            background: rgba(255,255,255,0.9); color: #1e3c72; font-size: 14px; font-weight: 600; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -340,10 +499,24 @@
         <button id="accessibilityBtn" class="voice-off" onclick="toggleAccessibility()">Enable Voice Help</button>
     </div>
     
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">Finding schemes for you...</div>
+    <!-- Progress Indicator -->
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-steps">
+            <div class="progress-step" id="step1Indicator">
+                <div class="step-circle">1</div>
+                <span class="step-label">Enter Details</span>
+            </div>
+            <div class="step-connector" id="connector1"></div>
+            <div class="progress-step" id="step2Indicator">
+                <div class="step-circle">2</div>
+                <span class="step-label">Processing</span>
+            </div>
+            <div class="step-connector" id="connector2"></div>
+            <div class="progress-step" id="step3Indicator">
+                <div class="step-circle">3</div>
+                <span class="step-label">Results</span>
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -352,94 +525,99 @@
         <!-- Voice Status Indicator -->
         <div class="voice-status" id="voiceStatus"></div>
         
-        <form id="schemeForm">
-            <div class="form-group">
-                <label for="age" id="labelAge">Age</label>
-                <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
-            </div>
-            <div class="form-group">
-                <label for="occupation" id="labelOccupation">Occupation</label>
-                <select id="occupation" name="occupation" required>
-                    <option value="">Select your occupation</option>
-                    <option value="student">Student</option>
-                    <option value="farmer">Farmer</option>
-                    <option value="business">Business Owner</option>
-                    <option value="employee">Salaried Employee</option>
-                    <option value="unemployed">Unemployed</option>
-                    <option value="homemaker">Homemaker</option>
-                    <option value="senior_citizen">Senior Citizen</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="income" id="labelIncome">Annual Income (₹)</label>
-                <input type="number" id="income" name="income" min="0" placeholder="Enter annual income" required>
-            </div>
-            <div class="form-group">
-                <label for="state" id="labelState">State</label>
-                <select id="state" name="state" required>
-                    <option value="">Select your state</option>
-                    <option value="Andhra Pradesh">Andhra Pradesh</option>
-                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                    <option value="Assam">Assam</option>
-                    <option value="Bihar">Bihar</option>
-                    <option value="Chhattisgarh">Chhattisgarh</option>
-                    <option value="Goa">Goa</option>
-                    <option value="Gujarat">Gujarat</option>
-                    <option value="Haryana">Haryana</option>
-                    <option value="Himachal Pradesh">Himachal Pradesh</option>
-                    <option value="Jharkhand">Jharkhand</option>
-                    <option value="Karnataka">Karnataka</option>
-                    <option value="Kerala">Kerala</option>
-                    <option value="Madhya Pradesh">Madhya Pradesh</option>
-                    <option value="Maharashtra">Maharashtra</option>
-                    <option value="Manipur">Manipur</option>
-                    <option value="Meghalaya">Meghalaya</option>
-                    <option value="Mizoram">Mizoram</option>
-                    <option value="Nagaland">Nagaland</option>
-                    <option value="Odisha">Odisha</option>
-                    <option value="Punjab">Punjab</option>
-                    <option value="Rajasthan">Rajasthan</option>
-                    <option value="Sikkim">Sikkim</option>
-                    <option value="Tamil Nadu">Tamil Nadu</option>
-                    <option value="Telangana">Telangana</option>
-                    <option value="Tripura">Tripura</option>
-                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                    <option value="Uttarakhand">Uttarakhand</option>
-                    <option value="West Bengal">West Bengal</option>
-                    <option value="Delhi">Delhi (NCT)</option>
-                    <option value="Puducherry">Puducherry</option>
-                </select>
-            </div>
+        <!-- Step 1: User Input -->
+        <div class="step-container active" id="step1">
+            <form id="schemeForm">
+                <div class="form-group">
+                    <label for="age" id="labelAge">Age</label>
+                    <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
+                    <div class="error-message" id="ageError">Please enter a valid age between 1 and 120</div>
+                </div>
+                <div class="form-group">
+                    <label for="occupation" id="labelOccupation">Occupation</label>
+                    <select id="occupation" name="occupation" required>
+                        <option value="">Select your occupation</option>
+                        <option value="student">Student</option>
+                        <option value="farmer">Farmer</option>
+                        <option value="business">Business Owner</option>
+                        <option value="employee">Salaried Employee</option>
+                        <option value="unemployed">Unemployed</option>
+                        <option value="homemaker">Homemaker</option>
+                        <option value="senior_citizen">Senior Citizen</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <div class="error-message" id="occupationError">Please select your occupation</div>
+                </div>
+                <div class="form-group">
+                    <label for="income" id="labelIncome">Annual Income (₹)</label>
+                    <input type="number" id="income" name="income" min="0" placeholder="Enter annual income" required>
+                    <div class="error-message" id="incomeError">Please enter a valid income</div>
+                </div>
+                <div class="form-group">
+                    <label for="state" id="labelState">State</label>
+                    <select id="state" name="state" required>
+                        <option value="">Select your state</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="West Bengal">West Bengal</option>
+                        <option value="Delhi">Delhi (NCT)</option>
+                        <option value="Puducherry">Puducherry</option>
+                    </select>
+                    <div class="error-message" id="stateError">Please select your state</div>
+                </div>
+            </form>
+            
             <button type="button" id="voiceAssistantBtn" class="voice-assistant-btn" onclick="startVoiceAssistant()">🎤 Start Voice Assistant</button>
+            
+            <div class="nav-buttons">
+                <button type="button" class="back-btn" id="backBtn" onclick="goBack()">← Back</button>
+                <button type="button" class="next-btn" id="nextBtn" onclick="goToStep2()">Find Schemes →</button>
+            </div>
+        </div>
+        
+        <!-- Step 2: Processing -->
+        <div class="step-container" id="step2">
+            <div class="processing-content">
+                <div class="processing-spinner"></div>
+                <div class="processing-text" id="processingText">Finding schemes for you...</div>
+                <div class="processing-subtext">Please wait while we analyze your eligibility</div>
+            </div>
+        </div>
+        
+        <!-- Step 3: Results -->
+        <div class="step-container" id="step3">
+            <div class="results-header">
+                <div class="results-count" id="resultsCount"></div>
+            </div>
+            <div id="resultsContent"></div>
+            
             <button type="button" id="restartBtn" class="restart-btn" onclick="restartConversation()">🔄 Start Again</button>
-            <button type="submit" id="submitBtn">Find Eligible Schemes</button>
-            <button type="button" id="resetBtn" class="reset-btn" onclick="resetForm()">Reset Form</button>
-        </form>
-        <div id="result"></div>
-    </div>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="certificateModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-            <h2 id="modalTitle">Certificate Details</h2>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Documents Required:</div>
-                <div class="modal-detail-value" id="modalDocuments"></div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Processing Time:</div>
-                <div class="modal-detail-value" id="modalProcessingTime"></div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Application Mode:</div>
-                <div class="modal-detail-value" id="modalApplicationMode"></div>
-            </div>
-            <div class="modal-detail">
-                <div class="modal-detail-label">Can Apply From Home:</div>
-                <div class="modal-detail-value" id="modalCanApplyFromHome"></div>
-            </div>
+            <button type="button" class="reset-btn" onclick="resetForm()">Reset Form</button>
         </div>
     </div>
 
@@ -457,7 +635,22 @@
         const MAX_RETRIES = 3;
         let isSpeaking = false;
         let isListening = false;
-        let pendingQuestion = null;
+        
+        // Schemes data
+        let schemes = [
+            {id:1,name:"National Scholarship Portal",description:"Scholarship for students",benefit:"₹10,000-25,000/yr",documents_required:"Aadhar, Income Cert",benefit_delivery_time:"30-45 days",duration:"Yearly",official_link:"https://scholarships.gov.in",min_age:18,max_age:25,max_income:250000,occupation:"student",state:"all",required_certificates:["Income Certificate"]},
+            {id:2,name:"PM Kisan Samman Nidhi",description:"Support for farmers",benefit:"₹6,000/yr",documents_required:"Aadhar, Land Records",benefit_delivery_time:"15-30 days",duration:"Yearly",official_link:"https://pmkisan.gov.in",min_age:18,max_age:60,max_income:200000,occupation:"farmer",state:"all",required_certificates:["Agricultural Certificate"]},
+            {id:3,name:"Stand Up India",description:"Loans for entrepreneurs",benefit:"₹10L-1Cr",documents_required:"Aadhar, Business Plan",benefit_delivery_time:"60-90 days",duration:"7 years",official_link:"https://standupmitra.in",min_age:18,max_age:50,max_income:1000000,occupation:"business",state:"all",required_certificates:["Caste Certificate"]},
+            {id:4,name:"MGNREGA",description:"100 days employment",benefit:"₹300-450/day",documents_required:"Aadhar, Bank Account",benefit_delivery_time:"15 days",duration:"Yearly",official_link:"https://nrega.nic.in",min_age:18,max_age:60,max_income:200000,occupation:"unemployed",state:"all",required_certificates:["Residence Certificate"]},
+            {id:5,name:"Atal Pension Yojana",description:"Pension scheme",benefit:"₹1,000-5,000/mo",documents_required:"Aadhar, Bank Account",benefit_delivery_time:"Immediate",duration:"Life-long",official_link:"https://npscra.nsdl.co.in",min_age:18,max_age:40,max_income:500000,occupation:"employee",state:"all",required_certificates:[]},
+            {id:6,name:"PMJAY",description:"Health insurance",benefit:"₹5 lakh coverage",documents_required:"Aadhar Card",benefit_delivery_time:"Instant",duration:"Yearly",official_link:"https://pmjay.gov.in",min_age:0,max_age:100,max_income:300000,occupation:"all",state:"all",required_certificates:["Income Certificate"]},
+            {id:7,name:"IGMSY",description:"Maternity benefit",benefit:"₹5,000",documents_required:"Aadhar, MCP Card",benefit_delivery_time:"30-60 days",duration:"Pregnancy",official_link:"https://nhm.gov.in",min_age:18,max_age:45,max_income:300000,occupation:"homemaker",state:"all",required_certificates:["Birth Certificate"]},
+            {id:8,name:"Varishtha Pension",description:"Senior citizen pension",benefit:"₹500-5,000/mo",documents_required:"Aadhar, Age Proof",benefit_delivery_time:"30 days",duration:"Life-long",official_link:"https://licindia.in",min_age:60,max_age:100,max_income:500000,occupation:"senior_citizen",state:"all",required_certificates:["Senior Citizen Certificate"]},
+            {id:9,name:"Karnataka Scholarship",description:"For Karnataka students",benefit:"₹1,000-10,000",documents_required:"Income Cert",benefit_delivery_time:"45-60 days",duration:"Yearly",official_link:"https://karnataka.gov.in",min_age:5,max_age:22,max_income:200000,occupation:"student",state:"Karnataka",required_certificates:["Income Certificate","Domicile Certificate"]},
+            {id:10,name:"Maharashtra Bal Sangopan",description:"Child welfare",benefit:"₹300/mo",documents_required:"Birth Cert",benefit_delivery_time:"30 days",duration:"Until 18",official_link:"https://maharashtra.gov.in",min_age:0,max_age:18,max_income:250000,occupation:"all",state:"Maharashtra",required_certificates:["Birth Certificate","Income Certificate"]},
+            {id:11,name:"TN Unemployment Allowance",description:"For unemployed youth",benefit:"₹500-1,000/mo",documents_required:"Education Certs",benefit_delivery_time:"30-45 days",duration:"2 years",official_link:"https://tn.gov.in",min_age:18,max_age:35,max_income:150000,occupation:"unemployed",state:"Tamil Nadu",required_certificates:["Unemployment Certificate"]},
+            {id:12,name:"UP Kanya Sumangala",description:"For girl child",benefit:"₹5,000-15,000",documents_required:"Birth Cert",benefit_delivery_time:"30-60 days",duration:"Until Class 12",official_link:"https://up.gov.in",min_age:0,max_age:18,max_income:300000,occupation:"all",state:"Uttar Pradesh",required_certificates:["Birth Certificate","Income Certificate"]}
+        ];
         
         // Check if speech recognition is supported
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -469,7 +662,52 @@
             recognition.maxAlternatives = 1;
         }
         
-        // Update voice status indicator
+        // Update progress indicator
+        function updateProgressIndicator(step) {
+            const step1Ind = document.getElementById('step1Indicator');
+            const step2Ind = document.getElementById('step2Indicator');
+            const step3Ind = document.getElementById('step3Indicator');
+            const conn1 = document.getElementById('connector1');
+            const conn2 = document.getElementById('connector2');
+            
+            step1Ind.className = 'progress-step';
+            step2Ind.className = 'progress-step';
+            step3Ind.className = 'progress-step';
+            conn1.className = 'step-connector';
+            conn2.className = 'step-connector';
+            
+            if (step >= 1) {
+                step1Ind.classList.add('completed');
+                conn1.classList.add('completed');
+            }
+            if (step === 1) {
+                step1Ind.classList.add('active');
+            }
+            
+            if (step >= 2) {
+                step2Ind.classList.add('completed');
+                conn2.classList.add('completed');
+            }
+            if (step === 2) {
+                step2Ind.classList.add('active');
+            }
+            
+            if (step === 3) {
+                step3Ind.classList.add('active');
+            }
+        }
+        
+        // Show step
+        function showStep(stepNum) {
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step3').classList.remove('active');
+            
+            document.getElementById('step' + stepNum).classList.add('active');
+            updateProgressIndicator(stepNum);
+        }
+        
+        // Voice status functions
         function updateVoiceStatus(status, message) {
             const statusEl = document.getElementById('voiceStatus');
             statusEl.className = 'voice-status ' + status;
@@ -482,7 +720,7 @@
             statusEl.textContent = '';
         }
         
-        // Speak text with callback support
+        // Speak text with callback
         function speak(text, callback) {
             if (isVoiceMode && speechEnabled) {
                 speechSynthesis.cancel();
@@ -497,18 +735,14 @@
                 utterance.onend = function() {
                     isSpeaking = false;
                     clearVoiceStatus();
-                    if (callback) {
-                        callback();
-                    }
+                    if (callback) callback();
                 };
                 
                 utterance.onerror = function(event) {
                     isSpeaking = false;
                     clearVoiceStatus();
                     console.error('Speech synthesis error:', event);
-                    if (callback) {
-                        callback();
-                    }
+                    if (callback) callback();
                 };
                 
                 speechSynthesis.speak(utterance);
@@ -531,41 +765,187 @@
             }
         }
         
-        function startVoiceAssistant() {
-            if (!recognition) {
-                alert("Voice input is not supported in this browser.");
-                return;
+        // Validate Step 1 form
+        function validateStep1() {
+            let isValid = true;
+            
+            // Validate age
+            const age = document.getElementById('age').value;
+            const ageError = document.getElementById('ageError');
+            if (!age || age < 1 || age > 120) {
+                ageError.classList.add('visible');
+                isValid = false;
+            } else {
+                ageError.classList.remove('visible');
             }
             
-            // Check microphone permission
-            if (recognition.permission === 'denied') {
-                showMicPermissionError();
-                return;
+            // Validate occupation
+            const occupation = document.getElementById('occupation').value;
+            const occupationError = document.getElementById('occupationError');
+            if (!occupation) {
+                occupationError.classList.add('visible');
+                isValid = false;
+            } else {
+                occupationError.classList.remove('visible');
             }
             
-            // Disable the button and show listening state
-            const btn = document.getElementById('voiceAssistantBtn');
-            const restartBtn = document.getElementById('restartBtn');
-            btn.disabled = true;
-            btn.classList.add('listening');
-            btn.textContent = '👂 Listening...';
-            restartBtn.classList.remove('visible');
+            // Validate income
+            const income = document.getElementById('income').value;
+            const incomeError = document.getElementById('incomeError');
+            if (!income || income < 0) {
+                incomeError.classList.add('visible');
+                isValid = false;
+            } else {
+                incomeError.classList.remove('visible');
+            }
             
-            // Reset data
-            voiceData = { age: null, occupation: null, income: null, state: null };
-            voiceAssistantStep = 0;
-            retryCount = 0;
+            // Validate state
+            const state = document.getElementById('state').value;
+            const stateError = document.getElementById('stateError');
+            if (!state) {
+                stateError.classList.add('visible');
+                isValid = false;
+            } else {
+                stateError.classList.remove('visible');
+            }
             
-            // Start the conversation
-            speak("Hello! I will help you find eligible government schemes. Let me ask you a few questions.", () => {
-                setTimeout(() => {
-                    askNextQuestion();
-                }, 500);
-            });
+            return isValid;
         }
         
+        // Go to Step 2 (Processing)
+        function goToStep2() {
+            if (!validateStep1()) {
+                if (isVoiceMode) {
+                    speak("Please fill in all the required fields correctly.");
+                }
+                return;
+            }
+            
+            // Show progress indicator for both manual and voice modes
+            document.getElementById('progressContainer').classList.add('visible');
+            
+            // Announce step change
+            if (isVoiceMode) {
+                speak("Now let me find eligible schemes for you. Please wait...", () => {
+                    proceedToStep2();
+                });
+            } else {
+                proceedToStep2();
+            }
+        }
+        
+        function proceedToStep2() {
+            showStep(2);
+            
+            // Announce we're processing
+            if (isVoiceMode) {
+                speak("Finding schemes for you...");
+            }
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                goToStep3();
+            }, 2000);
+        }
+        
+        // Go to Step 3 (Results)
+        function goToStep3() {
+            const age = parseInt(document.getElementById('age').value);
+            const occupation = document.getElementById('occupation').value;
+            const income = parseInt(document.getElementById('income').value);
+            const state = document.getElementById('state').value;
+            
+            // Filter schemes
+            const matchingSchemes = schemes.filter(scheme => {
+                const ageMatch = age >= scheme.min_age && age <= scheme.max_age;
+                const incomeMatch = income <= scheme.max_income;
+                const occMatch = scheme.occupation === 'all' || scheme.occupation === occupation;
+                const stateMatch = scheme.state === 'all' || scheme.state === state;
+                return ageMatch && incomeMatch && occMatch && stateMatch;
+            });
+            
+            showStep(3);
+            document.getElementById('restartBtn').classList.add('visible');
+            
+            // Display results
+            const resultsCount = document.getElementById('resultsCount');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            if (matchingSchemes.length > 0) {
+                resultsCount.textContent = `You are eligible for ${matchingSchemes.length} scheme${matchingSchemes.length > 1 ? 's' : ''}!`;
+                resultsCount.classList.remove('no-match');
+                
+                let html = '<div class="scheme-list">';
+                matchingSchemes.forEach(scheme => {
+                    html += `<div class="scheme-card">
+                        <div class="scheme-name">${scheme.name}</div>
+                        <p class="scheme-desc">${scheme.description}</p>
+                        <div class="scheme-detail">
+                            <span class="label">Benefit:</span>
+                            <span class="value">${scheme.benefit}</span>
+                        </div>
+                        <div class="scheme-detail">
+                            <span class="label">Duration:</span>
+                            <span class="value">${scheme.duration}</span>
+                        </div>`;
+                    
+                    if (scheme.required_certificates && scheme.required_certificates.length > 0) {
+                        html += `<div class="scheme-documents">
+                            <span class="label">Required Documents:</span>
+                            <span class="value">${scheme.required_certificates.join(', ')}</span>
+                        </div>`;
+                    }
+                    
+                    html += `<a href="${scheme.official_link}" target="_blank" class="apply-btn">Apply Now</a></div>`;
+                });
+                html += '</div>';
+                resultsContent.innerHTML = html;
+                
+                // Voice announcement
+                if (isVoiceMode) {
+                    const count = matchingSchemes.length;
+                    let resultText = "You are eligible for " + count + " scheme";
+                    if (count > 1) resultText += "s";
+                    if (count > 0) {
+                        resultText += ". Top scheme: " + matchingSchemes[0].name + ". Benefit: " + matchingSchemes[0].benefit;
+                    }
+                    speak(resultText);
+                }
+            } else {
+                resultsCount.textContent = "No schemes found based on your eligibility criteria";
+                resultsCount.classList.add('no-match');
+                resultsContent.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Try adjusting your criteria or <button onclick="goBack()" style="background:#1e3c72;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;margin-left:10px;">Go Back</button></p>';
+                
+                if (isVoiceMode) {
+                    speak("No schemes found based on your eligibility criteria. Please try different options.");
+                }
+            }
+        }
+        
+        // Go back to Step 1
+        function goBack() {
+            showStep(1);
+            if (isVoiceMode) {
+                speak("Let's go back to enter your details.");
+            }
+        }
+        
+        // Reset form
+        function resetForm() {
+            document.getElementById('schemeForm').reset();
+            showStep(1);
+            document.getElementById('restartBtn').classList.remove('visible');
+            document.getElementById('resultsContent').innerHTML = '';
+            // Hide progress indicator when resetting
+            document.getElementById('progressContainer').classList.remove('visible');
+            
+            if (isVoiceMode) {
+                speak("Form has been reset. Please fill in your details again.");
+            }
+        }
+        
+        // Restart conversation
         function restartConversation() {
-            // Reset form
             resetForm();
             
             // Reset voice data
@@ -573,21 +953,35 @@
             voiceAssistantStep = 0;
             retryCount = 0;
             
-            // Reset button states
-            const btn = document.getElementById('voiceAssistantBtn');
-            const restartBtn = document.getElementById('restartBtn');
-            btn.disabled = false;
-            btn.classList.remove('listening');
-            btn.textContent = '🎤 Start Voice Assistant';
-            restartBtn.classList.remove('visible');
-            
-            // Start voice assistant again
+            // Start voice assistant
             startVoiceAssistant();
+        }
+        
+        // Voice Assistant Functions
+        function startVoiceAssistant() {
+            if (!recognition) {
+                alert("Voice input is not supported in this browser.");
+                return;
+            }
+            
+            const btn = document.getElementById('voiceAssistantBtn');
+            btn.disabled = true;
+            btn.classList.add('listening');
+            btn.textContent = '👂 Listening...';
+            
+            voiceData = { age: null, occupation: null, income: null, state: null };
+            voiceAssistantStep = 0;
+            retryCount = 0;
+            
+            speak("Hello! I will help you find eligible government schemes. Let me ask you a few questions.", () => {
+                setTimeout(() => {
+                    askNextQuestion();
+                }, 500);
+            });
         }
         
         function askNextQuestion() {
             if (voiceAssistantStep >= 4) {
-                // All questions completed, submit the form
                 submitVoiceForm();
                 return;
             }
@@ -626,9 +1020,7 @@
             
             const btn = document.getElementById('voiceAssistantBtn');
             
-            // Wait for any ongoing speech to finish
             waitForSpeechToFinish(() => {
-                // Set up the recognition handler
                 recognition.onresult = function(event) {
                     isListening = false;
                     btn.classList.remove('listening');
@@ -637,9 +1029,7 @@
                     const transcript = event.results[0][0].transcript.toLowerCase().trim();
                     console.log("Voice input for", fieldId, ":", transcript);
                     
-                    // Reset retry count on successful input
                     retryCount = 0;
-                    
                     let success = false;
                     let errorMessage = "";
                     
@@ -688,7 +1078,7 @@
                         if (state) {
                             voiceData.state = state;
                             document.getElementById('state').value = state;
-                            speak("Your state is " + state + ". Now finding eligible schemes for you.", () => {
+                            speak("Your state is " + state + ". Now let me find eligible schemes.", () => {
                                 voiceAssistantStep++;
                                 setTimeout(() => askNextQuestion(), 500);
                             });
@@ -726,7 +1116,6 @@
                 };
                 
                 recognition.onend = function() {
-                    // Recognition ended without result
                     if (isListening) {
                         isListening = false;
                         btn.classList.remove('listening');
@@ -735,7 +1124,6 @@
                     }
                 };
                 
-                // Start listening
                 isListening = true;
                 btn.disabled = false;
                 btn.classList.add('listening');
@@ -756,16 +1144,13 @@
             retryCount++;
             
             if (retryCount >= MAX_RETRIES) {
-                // Too many retries, ask if user wants to continue
-                speak("I've tried several times but couldn't understand. Would you like to try again or skip this question?", () => {
+                speak("I've tried several times but couldn't understand. Let me try again.", () => {
                     retryCount = 0;
-                    // Set up a simple recognition to continue
                     setTimeout(() => {
                         setupRecognition(fieldId);
                     }, 2000);
                 });
             } else {
-                // Retry with the same question
                 speak(errorMessage, () => {
                     setTimeout(() => {
                         setupRecognition(fieldId);
@@ -782,7 +1167,6 @@
                 }, 3000);
             });
             
-            // Enable manual mode
             const btn = document.getElementById('voiceAssistantBtn');
             btn.disabled = false;
             btn.classList.remove('listening');
@@ -791,51 +1175,28 @@
         
         function submitVoiceForm() {
             const btn = document.getElementById('voiceAssistantBtn');
-            const restartBtn = document.getElementById('restartBtn');
             btn.disabled = false;
             btn.classList.remove('listening');
             btn.textContent = '🎤 Start Voice Assistant';
-            restartBtn.classList.add('visible');
             
-            // Show loading
-            showLoading();
-            
-            speak("Finding schemes for you...", () => {
-                // Submit the form programmatically
-                setTimeout(() => {
-                    document.getElementById('schemeForm').dispatchEvent(new Event('submit'));
-                }, 500);
-            });
+            // Show progress and proceed
+            document.getElementById('progressContainer').classList.add('visible');
+            proceedToStep2();
         }
         
-        function showLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            const loadingText = document.getElementById('loadingText');
-            loadingText.textContent = "Finding schemes for you...";
-            overlay.classList.add('active');
-        }
-        
-        function hideLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.classList.remove('active');
-        }
-        
-        // Enhanced number extraction with proper handling of spoken numbers
+        // Number extraction
         function extractNumber(text) {
             text = text.toLowerCase().trim();
             
-            // First try direct digit extraction
             const digits = text.match(/\d+/);
             if (digits) {
                 return parseInt(digits[0]);
             }
             
-            // Number words mapping
             const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
                          'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
             const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
             
-            // Check for lakh, thousand, crore
             let multiplier = 1;
             if (text.includes('crore')) {
                 multiplier = 10000000;
@@ -851,10 +1212,8 @@
                 text = text.replace(/hundred/g, '').trim();
             }
             
-            // Handle simple cases like "twenty two" or "22"
             let result = 0;
             
-            // Try to parse compound numbers like "twenty two", "thirty five"
             for (let i = 0; i < ones.length; i++) {
                 if (text === ones[i]) {
                     result = i;
@@ -863,7 +1222,6 @@
             }
             
             if (result === 0) {
-                // Try parsing tens
                 for (let i = 2; i < tens.length; i++) {
                     if (text.startsWith(tens[i])) {
                         result = i * 10;
@@ -879,7 +1237,6 @@
                 }
             }
             
-            // If still no result, try matching the full text
             if (result === 0) {
                 const numberWords = {
                     'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
@@ -892,7 +1249,6 @@
                 
                 for (const [word, num] of Object.entries(numberWords)) {
                     if (text.includes(word)) {
-                        // Check if it's at the beginning or standalone
                         const index = text.indexOf(word);
                         if (index === 0 || (index > 0 && text[index - 1] === ' ')) {
                             result = num;
@@ -909,7 +1265,7 @@
             return null;
         }
         
-        // Match occupation from speech
+        // Match occupation
         function matchOccupation(text) {
             const occupations = [
                 { value: 'student', keywords: ['student', 'study', 'studying', 'college', 'school', 'studies'] },
@@ -933,7 +1289,7 @@
             return null;
         }
         
-        // Match state from speech
+        // Match state
         function matchState(text) {
             const states = [
                 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -953,7 +1309,7 @@
             return null;
         }
         
-        // Check localStorage on load
+        // Window onload
         window.onload = function() {
             const savedMode = localStorage.getItem('schemeFinderMode');
             if (savedMode) {
@@ -966,7 +1322,7 @@
             }
         };
         
-        // Set mode from welcome screen
+        // Set mode
         function setMode(mode) {
             if (mode === 'voice') {
                 isVoiceMode = true;
@@ -987,12 +1343,10 @@
             document.getElementById('accessibilityBtn').textContent = 'Disable Voice Help';
             document.getElementById('accessibilityBtn').classList.remove('voice-off');
             document.getElementById('accessibilityBtn').classList.add('voice-on');
-            
-            // Read the main page content
             speakPageContent();
         }
         
-        // Speak the main page content
+        // Speak page content
         function speakPageContent() {
             if (!isVoiceMode) return;
             
@@ -1003,7 +1357,7 @@
             content += "Second field: Occupation. Select your occupation from the list. ";
             content += "Third field: Annual Income. Enter your yearly income in rupees. ";
             content += "Fourth field: State. Select your state from the dropdown. ";
-            content += "Then click the Find Eligible Schemes button to see schemes you qualify for.";
+            content += "Then click the Find Schemes button to see schemes you qualify for.";
             
             speak(content);
         }
@@ -1017,7 +1371,7 @@
             speechSynthesis.cancel();
         }
         
-        // Toggle accessibility mode
+        // Toggle accessibility
         function toggleAccessibility() {
             if (isVoiceMode) {
                 disableVoiceMode();
@@ -1029,16 +1383,14 @@
             }
         }
         
-        // Add voice guidance to form fields
+        // Setup voice guidance
         function setupVoiceGuidance() {
             if (!isVoiceMode) return;
             
-            // Speak form instructions
             setTimeout(() => {
                 speak("Please fill in your details. First, enter your age.");
             }, 500);
             
-            // Add focus events for voice guidance
             const ageInput = document.getElementById('age');
             const occupationSelect = document.getElementById('occupation');
             const incomeInput = document.getElementById('income');
@@ -1059,153 +1411,7 @@
             stateSelect.addEventListener('focus', function() {
                 speak("Select your state from the list.");
             });
-            
-            document.getElementById('submitBtn').addEventListener('click', function() {
-                speak("Finding eligible schemes for you.");
-            });
-            
-            document.getElementById('resetBtn').addEventListener('click', function() {
-                speak("Form has been reset. Please fill in your details again.");
-            });
         }
-        
-        // Default data
-        let schemes = [
-            {id:1,name:"National Scholarship Portal",description:"Scholarship for students",benefit:"₹10,000-25,000/yr",documents_required:"Aadhar, Income Cert",benefit_delivery_time:"30-45 days",duration:"Yearly",official_link:"https://scholarships.gov.in",min_age:18,max_age:25,max_income:250000,occupation:"student",state:"all",required_certificates:["Income Certificate"]},
-            {id:2,name:"PM Kisan Samman Nidhi",description:"Support for farmers",benefit:"₹6,000/yr",documents_required:"Aadhar, Land Records",benefit_delivery_time:"15-30 days",duration:"Yearly",official_link:"https://pmkisan.gov.in",min_age:18,max_age:60,max_income:200000,occupation:"farmer",state:"all",required_certificates:["Agricultural Certificate"]},
-            {id:3,name:"Stand Up India",description:"Loans for entrepreneurs",benefit:"₹10L-1Cr",documents_required:"Aadhar, Business Plan",benefit_delivery_time:"60-90 days",duration:"7 years",official_link:"https://standupmitra.in",min_age:18,max_age:50,max_income:1000000,occupation:"business",state:"all",required_certificates:["Caste Certificate"]},
-            {id:4,name:"MGNREGA",description:"100 days employment",benefit:"₹300-450/day",documents_required:"Aadhar, Bank Account",benefit_delivery_time:"15 days",duration:"Yearly",official_link:"https://nrega.nic.in",min_age:18,max_age:60,max_income:200000,occupation:"unemployed",state:"all",required_certificates:["Residence Certificate"]},
-            {id:5,name:"Atal Pension Yojana",description:"Pension scheme",benefit:"₹1,000-5,000/mo",documents_required:"Aadhar, Bank Account",benefit_delivery_time:"Immediate",duration:"Life-long",official_link:"https://npscra.nsdl.co.in",min_age:18,max_age:40,max_income:500000,occupation:"employee",state:"all",required_certificates:[]},
-            {id:6,name:"PMJAY",description:"Health insurance",benefit:"₹5 lakh coverage",documents_required:"Aadhar Card",benefit_delivery_time:"Instant",duration:"Yearly",official_link:"https://pmjay.gov.in",min_age:0,max_age:100,max_income:300000,occupation:"all",state:"all",required_certificates:["Income Certificate"]},
-            {id:7,name:"IGMSY",description:"Maternity benefit",benefit:"₹5,000",documents_required:"Aadhar, MCP Card",benefit_delivery_time:"30-60 days",duration:"Pregnancy",official_link:"https://nhm.gov.in",min_age:18,max_age:45,max_income:300000,occupation:"homemaker",state:"all",required_certificates:["Birth Certificate"]},
-            {id:8,name:"Varishtha Pension",description:"Senior citizen pension",benefit:"₹500-5,000/mo",documents_required:"Aadhar, Age Proof",benefit_delivery_time:"30 days",duration:"Life-long",official_link:"https://licindia.in",min_age:60,max_age:100,max_income:500000,occupation:"senior_citizen",state:"all",required_certificates:["Senior Citizen Certificate"]},
-            {id:9,name:"Karnataka Scholarship",description:"For Karnataka students",benefit:"₹1,000-10,000",documents_required:"Income Cert",benefit_delivery_time:"45-60 days",duration:"Yearly",official_link:"https://karnataka.gov.in",min_age:5,max_age:22,max_income:200000,occupation:"student",state:"Karnataka",required_certificates:["Income Certificate","Domicile Certificate"]},
-            {id:10,name:"Maharashtra Bal Sangopan",description:"Child welfare",benefit:"₹300/mo",documents_required:"Birth Cert",benefit_delivery_time:"30 days",duration:"Until 18",official_link:"https://maharashtra.gov.in",min_age:0,max_age:18,max_income:250000,occupation:"all",state:"Maharashtra",required_certificates:["Birth Certificate","Income Certificate"]},
-            {id:11,name:"TN Unemployment Allowance",description:"For unemployed youth",benefit:"₹500-1,000/mo",documents_required:"Education Certs",benefit_delivery_time:"30-45 days",duration:"2 years",official_link:"https://tn.gov.in",min_age:18,max_age:35,max_income:150000,occupation:"unemployed",state:"Tamil Nadu",required_certificates:["Unemployment Certificate"]},
-            {id:12,name:"UP Kanya Sumangala",description:"For girl child",benefit:"₹5,000-15,000",documents_required:"Birth Cert",benefit_delivery_time:"30-60 days",duration:"Until Class 12",official_link:"https://up.gov.in",min_age:0,max_age:18,max_income:300000,occupation:"all",state:"Uttar Pradesh",required_certificates:["Birth Certificate","Income Certificate"]}
-        ];
-        
-        let certificates = [
-            {certificate_name:"Income Certificate",documents_required:["Aadhaar Card","Address Proof","Ration Card"],processing_time:"7 days",application_mode:"MeeSeva/Online",can_apply_from_home:true},
-            {certificate_name:"Caste Certificate",documents_required:["Aadhaar Card","Address Proof","Application Form"],processing_time:"15 days",application_mode:"MeeSeva/Tahsildar",can_apply_from_home:false},
-            {certificate_name:"Residence Certificate",documents_required:["Aadhaar Card","Address Proof","Voter ID"],processing_time:"5 days",application_mode:"MeeSeva/Online",can_apply_from_home:true},
-            {certificate_name:"Birth Certificate",documents_required:["Aadhaar of Parents","Hospital Certificate"],processing_time:"3 days",application_mode:"MeeSeva/Online",can_apply_from_home:true},
-            {certificate_name:"Domicile Certificate",documents_required:["Aadhaar Card","School Leaving Cert"],processing_time:"10 days",application_mode:"MeeSeva",can_apply_from_home:false},
-            {certificate_name:"Senior Citizen Certificate",documents_required:["Aadhaar Card","Age Proof"],processing_time:"5 days",application_mode:"MeeSeva/Online",can_apply_from_home:true},
-            {certificate_name:"BPL Certificate",documents_required:["Aadhaar Card","Income Certificate"],processing_time:"10 days",application_mode:"MeeSeva",can_apply_from_home:false},
-            {certificate_name:"Unemployment Certificate",documents_required:["Aadhaar Card","Education Certificates"],processing_time:"5 days",application_mode:"Employment Exchange",can_apply_from_home:true},
-            {certificate_name:"Agricultural Certificate",documents_required:["Aadhaar Card","Land Records"],processing_time:"7 days",application_mode:"MeeSeva",can_apply_from_home:false},
-            {certificate_name:"Land Ownership Certificate",documents_required:["Aadhaar Card","Land Records"],processing_time:"10 days",application_mode:"MeeSeva",can_apply_from_home:false}
-        ];
-        
-        const translations = {
-            en:{title:"Government Scheme Finder",age:"Age",occupation:"Occupation",income:"Annual Income (₹)",state:"State",submit:"Find Eligible Schemes",reset:"Reset Form",found:"Found Eligible Scheme(s)!",noSchemes:"No schemes found based on your eligibility",benefit:"Benefit",docsRequired:"Documents Required",duration:"Duration",applyNow:"Apply Now",reqCert:"Required Certificates",selOcc:"Select your occupation"}
-        };
-        
-        function resetForm() {
-            document.getElementById('schemeForm').reset();
-            document.getElementById('result').style.display = 'none';
-            // Hide restart button
-            document.getElementById('restartBtn').classList.remove('visible');
-        }
-        
-        function openCertificateModal(certName) {
-            const cert = certificates.find(c => c.certificate_name === certName);
-            if (cert) {
-                document.getElementById('modalTitle').textContent = cert.certificate_name;
-                document.getElementById('modalDocuments').textContent = cert.documents_required.join(', ');
-                document.getElementById('modalProcessingTime').textContent = cert.processing_time;
-                document.getElementById('modalApplicationMode').textContent = cert.application_mode;
-                document.getElementById('modalCanApplyFromHome').innerHTML = cert.can_apply_from_home ? '<span class="modal-yes">Yes</span>' : '<span class="modal-no">No</span>';
-                document.getElementById('certificateModal').classList.add('active');
-                
-                // Voice guidance for certificate details
-                if (isVoiceMode) {
-                    let certInfo = cert.certificate_name + ". Documents required: " + cert.documents_required.join(", ") + ". Processing time: " + cert.processing_time + " days. Application mode: " + cert.application_mode + ".";
-                    speak(certInfo);
-                }
-            }
-        }
-        
-        function closeModal() {
-            document.getElementById('certificateModal').classList.remove('active');
-        }
-        
-        document.getElementById('certificateModal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-        
-        document.getElementById('schemeForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const age = parseInt(document.getElementById('age').value);
-            const occupation = document.getElementById('occupation').value;
-            const income = parseInt(document.getElementById('income').value);
-            const state = document.getElementById('state').value;
-            const t = translations.en;
-            const resultDiv = document.getElementById('result');
-            
-            if (age < 1 || age > 120) {
-                alert('Please enter a valid age');
-                if (isVoiceMode) {
-                    speak("Please enter a valid age between 1 and 120.");
-                }
-                return;
-            }
-            
-            const matchingSchemes = schemes.filter(scheme => {
-                const ageMatch = age >= scheme.min_age && age <= scheme.max_age;
-                const incomeMatch = income <= scheme.max_income;
-                const occMatch = scheme.occupation === 'all' || scheme.occupation === occupation;
-                const stateMatch = scheme.state === 'all' || scheme.state === state;
-                return ageMatch && incomeMatch && occMatch && stateMatch;
-            });
-            
-            // Hide loading
-            hideLoading();
-            
-            if (matchingSchemes.length > 0) {
-                resultDiv.className = 'success';
-                let html = '<strong>' + t.found + '</strong><div class="scheme-list">';
-                matchingSchemes.forEach(scheme => {
-                    html += '<div class="scheme-card"><div class="scheme-name">' + scheme.name + '</div>';
-                    html += '<p class="scheme-desc">' + scheme.description + '</p>';
-                    html += '<div class="scheme-detail"><span class="label">' + t.benefit + ':</span><span class="value">' + scheme.benefit + '</span></div>';
-                    html += '<div class="scheme-detail"><span class="label">' + t.docsRequired + ':</span><span class="value">' + scheme.documents_required + '</span></div>';
-                    html += '<div class="scheme-detail"><span class="label">' + t.duration + ':</span><span class="value">' + scheme.duration + '</span></div>';
-                    if (scheme.required_certificates && scheme.required_certificates.length > 0) {
-                        html += '<div class="required-certificates"><span class="required-certificates-label">' + t.reqCert + ':</span>';
-                        scheme.required_certificates.forEach(cert => {
-                            html += '<span class="certificate-link" onclick="openCertificateModal(\'' + cert + '\')">' + cert + '</span>';
-                        });
-                        html += '</div>';
-                    }
-                    html += '<a href="' + scheme.official_link + '" target="_blank" class="apply-btn">' + t.applyNow + '</a></div>';
-                });
-                html += '</div>';
-                resultDiv.innerHTML = html;
-                
-                // Enhanced voice mode announcement
-                if (isVoiceMode) {
-                    const count = matchingSchemes.length;
-                    let resultText = "You are eligible for " + count + " scheme";
-                    if (count > 1) resultText += "s";
-                    
-                    // Add top scheme name
-                    if (count > 0) {
-                        resultText += ". Top scheme: " + matchingSchemes[0].name + ". Benefit: " + matchingSchemes[0].benefit;
-                    }
-                    
-                    speak(resultText);
-                }
-            } else {
-                resultDiv.className = 'error';
-                resultDiv.innerHTML = '<strong>' + t.noSchemes + '</strong>';
-                if (isVoiceMode) {
-                    speak("No schemes found based on your eligibility criteria. Please try different options.");
-                }
-            }
-        });
     </script>
 </body>
 </html>
