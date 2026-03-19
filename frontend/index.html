@@ -901,22 +901,26 @@
                 html += '</div>';
                 resultsContent.innerHTML = html;
                 
-                // Voice announcement
-                if (isVoiceMode) {
+                // Voice announcement - Enhanced summary
+                if (isVoiceMode && matchingSchemes.length > 0) {
                     const count = matchingSchemes.length;
-                    let resultText = "You are eligible for " + count + " scheme";
-                    if (count > 1) resultText += "s";
-                    if (count > 0) {
-                        resultText += ". Top scheme: " + matchingSchemes[0].name + ". Benefit: " + matchingSchemes[0].benefit;
-                    }
-                    speak(resultText);
-                }
-            } else {
-                resultsCount.textContent = "No schemes found based on your eligibility criteria";
-                resultsCount.classList.add('no-match');
-                resultsContent.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Try adjusting your criteria or <button onclick="goBack()" style="background:#1e3c72;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;margin-left:10px;">Go Back</button></p>';
-                
-                if (isVoiceMode) {
+                    const firstScheme = matchingSchemes[0];
+                    
+                    // Step 1: Announce count
+                    speak("You are eligible for " + count + " scheme" + (count > 1 ? "s" : ""), () => {
+                        // Step 2: Announce best scheme name
+                        setTimeout(() => {
+                            speak("The best scheme for you is " + firstScheme.name, () => {
+                                // Step 3: Announce certificates if needed
+                                setTimeout(() => {
+                                    if (firstScheme.required_certificates && firstScheme.required_certificates.length > 0) {
+                                        speak("You need " + firstScheme.required_certificates.join(" and ") + " to apply");
+                                    }
+                                }, 500);
+                            });
+                        }, 500);
+                    });
+                } else if (isVoiceMode) {
                     speak("No schemes found based on your eligibility criteria. Please try different options.");
                 }
             }
