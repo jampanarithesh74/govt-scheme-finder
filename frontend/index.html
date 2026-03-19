@@ -119,13 +119,15 @@
             color: #1e3c72;
             font-size: 32px;
             margin-bottom: 20px;
+            font-weight: 700;
         }
         
         .welcome-content p {
-            color: #666;
+            color: #6b7280;
             font-size: 18px;
             margin-bottom: 40px;
             line-height: 1.6;
+            font-weight: 400;
         }
         
         .mode-buttons {
@@ -136,33 +138,36 @@
         }
         
         .mode-btn {
-            padding: 25px 40px;
-            font-size: 20px;
+            padding: 16px 36px;
+            font-size: 16px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
         
         .mode-btn.read {
-            background: #28a745;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
         }
         
         .mode-btn.read:hover {
-            background: #218838;
-            transform: translateY(-3px);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
         }
         
         .mode-btn.voice {
-            background: #ffc107;
-            color: #333;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
         }
         
         .mode-btn.voice:hover {
-            background: #e0a800;
-            transform: translateY(-3px);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
         }
         
         /* Accessibility Toggle */
@@ -176,15 +181,23 @@
         .accessibility-toggle button {
             padding: 10px 20px;
             font-size: 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
         
         .accessibility-toggle button.voice-on {
-            background: #ffc107;
-            color: #333;
+            background: #10b981;
+            color: white;
+        }
+        
+        .accessibility-toggle button.voice-on:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
         
         .accessibility-toggle button.voice-off {
@@ -192,10 +205,18 @@
             color: white;
         }
         
+        .accessibility-toggle button.voice-off:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+        
         .container {
-            background: white; padding: 40px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 550px;
-            margin-top: 100px;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            padding: 40px; border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1);
+            width: 90%; max-width: 600px;
+            margin: 100px auto 20px;
         }
         
         /* Step Containers */
@@ -211,7 +232,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        h1 { color: #1e3c72; text-align: center; margin-bottom: 30px; font-size: 28px; }
+        h1 { color: #1e3c72; text-align: center; margin-bottom: 30px; font-size: 28px; font-weight: 700; }
         
         .form-group { margin-bottom: 20px; }
         
@@ -224,49 +245,55 @@
         
         /* Voice Assistant Button */
         .voice-assistant-btn {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 25px;
+            padding: 14px 28px;
+            font-size: 16px;
+            border-radius: 10px;
             cursor: pointer;
             width: 100%;
             margin-bottom: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
         }
         .voice-assistant-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.4);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45);
         }
         .voice-assistant-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
         .voice-assistant-btn.listening {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             animation: pulse 1s infinite;
         }
         
         /* Restart Button */
         .restart-btn {
-            background: #17a2b8;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 25px;
+            padding: 14px 28px;
+            font-size: 16px;
+            border-radius: 10px;
             cursor: pointer;
             width: 100%;
             margin-bottom: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
             display: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
         }
         .restart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.4);
-            background: #138496;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
         }
         .restart-btn.visible {
             display: block;
@@ -309,39 +336,54 @@
         /* Navigation Buttons */
         .nav-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-top: 20px;
         }
         
         .next-btn {
             flex: 1;
-            padding: 15px;
-            background: #1e3c72;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .next-btn:hover { background: #2a5298; }
-        .next-btn:disabled { background: #ccc; cursor: not-allowed; }
-        
-        .back-btn {
-            padding: 15px 25px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+        }
+        .next-btn:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45);
+        }
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .back-btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: none;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.35);
         }
         .back-btn.visible { display: block; }
-        .back-btn:hover { background: #5a6268; }
+        .back-btn:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #4b545c 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 28px rgba(108, 117, 125, 0.45);
+        }
         
         /* Step 2: Processing */
         .processing-content {
@@ -366,14 +408,15 @@
         
         .processing-text {
             font-size: 22px;
-            color: #333;
-            font-weight: 600;
+            color: #1f2937;
+            font-weight: 700;
             margin-bottom: 10px;
         }
         
         .processing-subtext {
             font-size: 16px;
-            color: #666;
+            color: #6b7280;
+            font-weight: 400;
         }
         
         /* Step 3: Results */
@@ -396,70 +439,89 @@
         .scheme-list { margin-top: 15px; }
         
         .scheme-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 5px solid #1e3c72;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            margin-left: -10px;
+            margin-right: -10px;
+            border: none;
+            border-left: 5px solid #2563eb;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
         
         .scheme-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.18);
+            border-left-color: #1d4ed8;
         }
         
-        .scheme-name { font-size: 18px; font-weight: 700; color: #1e3c72; margin-bottom: 8px; }
-        .scheme-desc { color: #666; margin-bottom: 12px; font-size: 14px; line-height: 1.4; }
+        .scheme-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3c72;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        .scheme-desc {
+            color: #6b7280;
+            margin-bottom: 16px;
+            font-size: 15px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
         
         .scheme-detail {
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: white;
-            border-radius: 6px;
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid #e2e8f0;
         }
         
-        .scheme-detail .label { font-weight: 600; color: #1e3c72; font-size: 13px; }
-        .scheme-detail .value { color: #333; font-size: 14px; font-weight: 500; }
+        .scheme-detail .label { font-weight: 600; color: #2563eb; font-size: 13px; }
+        .scheme-detail .value { color: #1f2937; font-size: 14px; font-weight: 500; }
         
         .scheme-documents {
-            margin-top: 10px;
-            padding: 10px;
-            background: white;
-            border-radius: 6px;
+            margin-top: 14px;
+            padding: 14px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
         
         .scheme-documents .label {
             font-weight: 600;
-            color: #1e3c72;
+            color: #2563eb;
             font-size: 13px;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         
         .apply-btn {
             display: inline-block;
             margin-top: 15px;
-            padding: 12px 30px;
-            background: #28a745;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-weight: 600;
-            transition: background 0.3s;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+            border: none;
         }
         
-        .apply-btn:hover { background: #218838; }
-        
-        /* Reset Button */
-        .reset-btn { 
-            background: #6c757d; 
-            margin-top: 20px;
+        .apply-btn:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
         }
-        .reset-btn:hover { background: #5a6268; }
         
         /* Error message */
         .error-message {
@@ -617,7 +679,6 @@
             <div id="resultsContent"></div>
             
             <button type="button" id="restartBtn" class="restart-btn" onclick="restartConversation()">🔄 Start Again</button>
-            <button type="button" class="reset-btn" onclick="resetForm()">Reset Form</button>
         </div>
     </div>
 
@@ -957,8 +1018,10 @@
             voiceAssistantStep = 0;
             retryCount = 0;
             
-            // Start voice assistant
-            startVoiceAssistant();
+            // Only start voice assistant if in voice mode
+            if (isVoiceMode) {
+                startVoiceAssistant();
+            }
         }
         
         // Voice Assistant Functions
